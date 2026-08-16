@@ -1,0 +1,18 @@
+{
+  "name": "the-thing",
+  "version": "1.0.0",
+  "description": "The thing, it's for Thobile",
+  "license": "MIT",
+  "author": "sihlecodes",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon --ignore public server.js"
+  },
+  "devDependencies": {
+    "connect-livereload": "^0.6.1",
+    "express": "^5.2.1",
+    "livereload": "^0.10.3",
+    "nodemon": "^3.1.14"
+  }
+}
