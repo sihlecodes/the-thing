@@ -2,10 +2,24 @@
     #board {
         fill: #e6c9db;
     }
+
+    .alternate-cell {
+        fill: #fff;
+    }
+
+    .cross {
+        stroke: red;
+        stroke-width: 5%;
+    }
+
+    .circle {
+        stroke: black;
+        stroke-width: 5%;
+    }
 </style>
 
 <svg id="canvas">
-    <rect id="board" x="0" y="0" width="100%" rx="5%" height="100%"/>
+    <rect id="board" x="0" y="0" width="100%" height="100%" rx="5%" />
 </svg>
 
 <script>
@@ -24,74 +38,114 @@
     for (let i = 1; i < 9; i+=2) {
         const cell = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 
+        cell.setAttribute("class", "alternate-cell");
         cell.setAttribute("x", (i % 3) * cellSideLength);
         cell.setAttribute("y", Math.floor(i / 3) * cellSideLength);
         cell.setAttribute("width", cellSideLength);
         cell.setAttribute("height", cellSideLength);
-        cell.setAttribute("fill", "#ffffff");
 
         canvas.appendChild(cell);
     }
 
+    let isGameOver = false;
     let turn = 0;
+
     let board = [
         [null, null, null],
         [null, null, null],
         [null, null, null]
     ];
 
-    function createCrossSymbol(x, y) {
+    const computedStyle = window.getComputedStyle(document.documentElement);
+    const crossColour = computedStyle.getPropertyValue('--cross-colour').trim();
+
+    function drawCrossSymbol(x, y) {
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+        group.setAttribute("class", "cross");
+        const computedStyle = window.getComputedStyle(group).getPropertyValue('stroke');
+
         const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
         const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
 
-        const stroke = "#000000";
         const strokeWidth = cellSideLength * 0.15;
+        const padding = cellSideLength * 0.25;
 
-        line1.setAttribute("x1", x * cellSideLength + cellSideLength * 0.2);
-        line1.setAttribute("y1", y * cellSideLength + cellSideLength * 0.2);
-        line1.setAttribute("x2", (x + 1) * cellSideLength - cellSideLength * 0.2);
-        line1.setAttribute("y2", (y + 1) * cellSideLength - cellSideLength * 0.2);
-        line1.setAttribute("stroke", stroke);
+        line1.setAttribute("x1", x * cellSideLength + padding);
+        line1.setAttribute("y1", y * cellSideLength + padding);
+        line1.setAttribute("x2", (x + 1) * cellSideLength - padding);
+        line1.setAttribute("y2", (y + 1) * cellSideLength - padding);
         line1.setAttribute("stroke-width", strokeWidth);
 
-        line2.setAttribute("x1", (x + 1) * cellSideLength - cellSideLength * 0.2);
-        line2.setAttribute("y1", y * cellSideLength + cellSideLength * 0.2);
-        line2.setAttribute("x2", x * cellSideLength + cellSideLength * 0.2);
-        line2.setAttribute("y2", (y + 1) * cellSideLength - cellSideLength * 0.2);
-        line2.setAttribute("stroke", stroke);
-        line2.setAttribute("stroke-width", strokeWidth);
+        line2.setAttribute("x1", (x + 1) * cellSideLength - padding);
+        line2.setAttribute("y1", y * cellSideLength + padding);
+        line2.setAttribute("x2", x * cellSideLength + padding);
+        line2.setAttribute("y2", (y + 1) * cellSideLength - padding);
 
-        canvas.appendChild(line1);
-        canvas.appendChild(line2);
+        group.appendChild(line1);
+        group.appendChild(line2);
+
+        canvas.appendChild(group);
     }
 
-    function createCircleSymbol(x, y) {
+    function drawCircleSymbol(x, y) {
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        const radius = cellSideLength * 0.25;
 
-        const stroke = "#000000";
-        const strokeWidth = cellSideLength * 0.15;
-        const radius = cellSideLength * 0.3;
-
+        circle.setAttribute("class", "circle");
         circle.setAttribute("cx", x * cellSideLength + cellSideLength / 2);
         circle.setAttribute("cy", y * cellSideLength + cellSideLength / 2);
         circle.setAttribute("r", radius);
-        circle.setAttribute("stroke", stroke);
-        circle.setAttribute("stroke-width", strokeWidth);
         circle.setAttribute("fill", "none");
 
         canvas.appendChild(circle);
     }
 
-    function placeSymbol(x, y, symbol) {
-        if (symbol === 'X') {
-            createCrossSymbol(x, y);
-        } else {
-            createCircleSymbol(x, y);
+    function checkWin(symbol) {
+        for (let i = 0; i < 3; i++) {
+            if (board[i][0] === symbol &&
+                board[i][1] === symbol &&
+                board[i][2] === symbol) {
+                return true;
+            }
+
+            if (board[0][i] === symbol &&
+                board[1][i] === symbol &&
+                board[2][i] === symbol) {
+                return true;
+            }
         }
+
+        if (board[0][0] === symbol &&
+            board[1][1] === symbol &&
+            board[2][2] === symbol) {
+            return true;
+        }
+
+        if (board[0][2] === symbol &&
+            board[1][1] === symbol &&
+            board[2][0] === symbol) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function placeSymbol(x, y, symbol) {
+        if (symbol === 'X')
+            drawCrossSymbol(x, y);
+        else
+            drawCircleSymbol(x, y);
+
         board[y][x] = symbol;
     }
 
     canvas.addEventListener('click', (event) => {
+        if (isGameOver) {
+            console.log('Game is over. Please refresh to play again.');
+            return;
+        }
+
         const x = event.offsetX;
         const y = event.offsetY;
 
@@ -105,10 +159,27 @@
             return;
         }
 
-        console.log(`Placing: ${turn % 2 === 0 ? 'X' : 'O'}`);
-        placeSymbol(cellX, cellY, turn % 2 === 0 ? 'X' : 'O');
-        turn++;
+        let symbol = turn % 2 === 0 ? 'X' : 'O';
 
-        canvas
+        console.log(`Placing: ${symbol}`);
+
+        placeSymbol(cellX, cellY, symbol);
+
+        if (checkWin(symbol)) {
+            console.log(`Player ${symbol} wins!`);
+            isGameOver = true;
+
+            getNextState(States.TTT_WON);
+        }
+
+        else if (board.flat().every(cell => cell !== null)) {
+            console.log("Oh no, Thobile. How did you manage to get a draw. I specifically programmed the computer to lose. Try again, or not.");
+            console.log('Draw!');
+            isGameOver = true;
+
+            getNextState(States.TTT_DRAW);
+        }
+
+        turn++;
     });
 </script>

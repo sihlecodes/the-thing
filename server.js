@@ -21,4 +21,8 @@ liveReloadServer.server.once("connection", () => {
 app.use(connectLiveReload());
 app.use(express.static(public));
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(public, 'index.html'));
+});
+
 app.listen(port, () => console.log(`Server running on port ${port}`));

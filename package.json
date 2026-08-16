@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon --ignore public server.js"
+    "dev": "nodemon --ignore docs server.js"
   },
   "devDependencies": {
     "connect-livereload": "^0.6.1",
