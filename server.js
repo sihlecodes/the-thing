@@ -6,7 +6,7 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
-const public = path.join(__dirname, 'public');
+const public = path.join(__dirname, 'docs');
 
 const liveReloadServer = livereload.createServer();
 liveReloadServer.watch(public);
