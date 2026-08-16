@@ -1,13 +1,16 @@
 const express = require('express');
-const path = require('path');
-const app = express();
-
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
+const path = require('path');
+
+const app = express();
+const port = 3000;
+
+const public = path.join(__dirname, 'public');
 
 const liveReloadServer = livereload.createServer();
-liveReloadServer.watch(path.join(__dirname, 'public'));
-liveReloadServer.watch(path.join(__dirname, 'public', 'views'));
+liveReloadServer.watch(public);
+liveReloadServer.watch(path.join(public, 'views'));
 
 liveReloadServer.server.once("connection", () => {
     setTimeout(() => {
@@ -16,10 +19,6 @@ liveReloadServer.server.once("connection", () => {
 });
 
 app.use(connectLiveReload());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(public));
 
-app.get('/', (req, res) => {
-    res.sendfile('public/index.html');
-});
-
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.listen(port, () => console.log(`Server running on port ${port}`));
