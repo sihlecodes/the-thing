@@ -57,4 +57,5 @@ function getNextState(currentState) {
     }
 }
 
-loadPage('tic-tac-toe');
+// loadPage('tic-tac-toe');
+loadPage('maze')

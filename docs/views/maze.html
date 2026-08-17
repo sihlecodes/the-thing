@@ -1,0 +1,97 @@
+<style>
+    #board {
+        fill: #e6c9db;
+        stroke: black;
+        stroke-width: 5px;
+        rx: 3%;
+    }
+
+    .wall {
+        fill: black;
+        stroke: black;
+    }
+</style>
+
+<svg id="canvas">
+    <rect id="board" />
+</svg>
+
+<script>
+    const canvas = document.getElementById("canvas");
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const canvasSideLength = Math.min(width, height) * 0.85;
+
+    canvas.setAttribute("width", canvasSideLength);
+    canvas.setAttribute("height", canvasSideLength);
+
+    const board = document.getElementById("board");
+    const boardOffset = window.getComputedStyle(board).getPropertyValue("stroke-width").replace("px", "") * 1;
+
+    const boardSideLength = canvasSideLength - boardOffset * 2;
+
+    board.setAttribute("x", boardOffset);
+    board.setAttribute("y", boardOffset);
+    board.setAttribute("width", boardSideLength);
+    board.setAttribute("height", boardSideLength);
+
+    const NONE   = 0;
+    const LEFT   = 1;
+    const RIGHT  = 2;
+    const TOP    = 4;
+    const BOTTOM = 8;
+
+    // Implement this
+    const DUPLICATE = 16;
+
+    let maze = [
+        [RIGHT, BOTTOM, LEFT],
+        [BOTTOM, BOTTOM | RIGHT, LEFT],
+        [NONE, NONE, NONE],
+    ];
+
+    const rows = maze.length;
+    const columns = maze[0].length;
+
+    const cellWidth = boardSideLength / columns;
+    const cellHeight = boardSideLength / rows;
+
+    const has = (cell, boundary) => (cell & boundary) !== 0;
+
+    function drawLine(x1, y1, x2, y2) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", "black");
+        line.setAttribute("stroke-width", ".2em");
+
+        canvas.appendChild(line);
+    }
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < columns; x++) {
+            const cell = maze[y][x];
+
+            const cellLeft = boardOffset + cellWidth * x;
+            const cellRight = cellLeft + cellWidth;
+            const cellTop = boardOffset + cellHeight * y;
+            const cellBottom = cellTop + cellHeight;
+
+            if (has(cell, LEFT))
+                drawLine(cellLeft, cellTop, cellLeft, cellBottom);
+
+            if (has(cell, RIGHT))
+                drawLine(cellRight, cellTop, cellRight, cellBottom);
+
+            if (has(cell, TOP))
+                drawLine(cellLeft, cellTop, cellRight, cellTop);
+
+            if (has(cell, BOTTOM))
+                drawLine(cellLeft, cellBottom, cellRight, cellBottom);
+        }
+    }
+</script>
