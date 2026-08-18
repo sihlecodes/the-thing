@@ -50,9 +50,9 @@
     const PATH = 128;
 
     let maze = [
-        [RIGHT, BOTTOM | DUPLICATE, LEFT | GOAL],
-        [BOTTOM, BOTTOM | RIGHT, LEFT],
-        [NONE | START, NONE, NONE],
+        [NONE, BOTTOM, NONE],
+        [BOTTOM, RIGHT, LEFT],
+        [NONE | START, NONE, LEFT | GOAL],
     ];
 
     const rows = maze.length;
@@ -104,6 +104,8 @@
         }
     }
 
+    let goalCircle = null;
+
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < columns; x++) {
             const cellProperties = maze[y][x];
@@ -135,7 +137,7 @@
             }
 
             if (has(cellProperties, GOAL)) {
-                const goalCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                goalCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 goalCircle.setAttribute("cx", cellLeft + cellWidth / 2);
                 goalCircle.setAttribute("cy", cellTop + cellHeight / 2);
                 goalCircle.setAttribute("r", Math.min(cellWidth, cellHeight) / 4);
@@ -282,12 +284,26 @@
                     );
 
                     maze[currentCell.y][currentCell.x] |= PATH;
+
+                    if (has(cellProperties, GOAL)) {
+                        goalCircle.setAttribute("fill", "mediumslateblue");
+                        console.log("Goal reached!");
+                    }
                 }
             }
         }
     });
 
     canvas.addEventListener("mouseup", (event) => {
+        const currentCell = getCellFromIndex(currentCellIndex);
+        const cellProperties = maze[currentCell.y][currentCell.x];
+
+        if (isValidDrag && has(cellProperties, GOAL)) {
+            goalCircle.setAttribute("fill", "mediumslateblue");
+            console.log("Goal reached!");
+            getNextState(States.MAZE_COMPLETE);
+        }
+
         isDragging = false;
         isValidDrag = true;
         previousCellIndex = null;

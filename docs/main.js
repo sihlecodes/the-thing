@@ -52,10 +52,16 @@ function getNextState(currentState) {
             loadPage('quiz');
             break;
 
+        case States.MAZE_COMPLETE:
+            showNaration('Congratulations', 'You have completed the maze!', () => {
+                console.log('done!');
+            });
+            break;
+
         default:
             console.log('Unknown state');
     }
 }
 
 // loadPage('tic-tac-toe');
-loadPage('maze')
+loadPage('maze');
