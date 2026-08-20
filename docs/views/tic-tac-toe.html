@@ -23,163 +23,165 @@
 </svg>
 
 <script>
-    const canvas = document.getElementById('canvas');
+    (function () {
+        const canvas = document.getElementById('canvas');
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
 
-    const boardSideLength = Math.min(width, height) * 0.85;
+        const boardSideLength = Math.min(width, height) * 0.85;
 
-    canvas.setAttribute('width', boardSideLength);
-    canvas.setAttribute('height', boardSideLength);
+        canvas.setAttribute('width', boardSideLength);
+        canvas.setAttribute('height', boardSideLength);
 
-    const cellSideLength = boardSideLength / 3;
+        const cellSideLength = boardSideLength / 3;
 
-    for (let i = 1; i < 9; i+=2) {
-        const cell = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        for (let i = 1; i < 9; i += 2) {
+            const cell = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 
-        cell.setAttribute("class", "alternate-cell");
-        cell.setAttribute("x", (i % 3) * cellSideLength);
-        cell.setAttribute("y", Math.floor(i / 3) * cellSideLength);
-        cell.setAttribute("width", cellSideLength);
-        cell.setAttribute("height", cellSideLength);
+            cell.setAttribute("class", "alternate-cell");
+            cell.setAttribute("x", (i % 3) * cellSideLength);
+            cell.setAttribute("y", Math.floor(i / 3) * cellSideLength);
+            cell.setAttribute("width", cellSideLength);
+            cell.setAttribute("height", cellSideLength);
 
-        canvas.appendChild(cell);
-    }
+            canvas.appendChild(cell);
+        }
 
-    let isGameOver = false;
-    let turn = 0;
+        let isGameOver = false;
+        let turn = 0;
 
-    let board = [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null]
-    ];
+        let board = [
+            [null, null, null],
+            [null, null, null],
+            [null, null, null]
+        ];
 
-    const computedStyle = window.getComputedStyle(document.documentElement);
-    const crossColour = computedStyle.getPropertyValue('--cross-colour').trim();
+        const computedStyle = window.getComputedStyle(document.documentElement);
+        const crossColour = computedStyle.getPropertyValue('--cross-colour').trim();
 
-    function drawCrossSymbol(x, y) {
-        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        function drawCrossSymbol(x, y) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
-        group.setAttribute("class", "cross");
-        const computedStyle = window.getComputedStyle(group).getPropertyValue('stroke');
+            group.setAttribute("class", "cross");
+            const computedStyle = window.getComputedStyle(group).getPropertyValue('stroke');
 
-        const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
 
-        const strokeWidth = cellSideLength * 0.15;
-        const padding = cellSideLength * 0.25;
+            const strokeWidth = cellSideLength * 0.15;
+            const padding = cellSideLength * 0.25;
 
-        line1.setAttribute("x1", x * cellSideLength + padding);
-        line1.setAttribute("y1", y * cellSideLength + padding);
-        line1.setAttribute("x2", (x + 1) * cellSideLength - padding);
-        line1.setAttribute("y2", (y + 1) * cellSideLength - padding);
-        line1.setAttribute("stroke-width", strokeWidth);
+            line1.setAttribute("x1", x * cellSideLength + padding);
+            line1.setAttribute("y1", y * cellSideLength + padding);
+            line1.setAttribute("x2", (x + 1) * cellSideLength - padding);
+            line1.setAttribute("y2", (y + 1) * cellSideLength - padding);
+            line1.setAttribute("stroke-width", strokeWidth);
 
-        line2.setAttribute("x1", (x + 1) * cellSideLength - padding);
-        line2.setAttribute("y1", y * cellSideLength + padding);
-        line2.setAttribute("x2", x * cellSideLength + padding);
-        line2.setAttribute("y2", (y + 1) * cellSideLength - padding);
+            line2.setAttribute("x1", (x + 1) * cellSideLength - padding);
+            line2.setAttribute("y1", y * cellSideLength + padding);
+            line2.setAttribute("x2", x * cellSideLength + padding);
+            line2.setAttribute("y2", (y + 1) * cellSideLength - padding);
 
-        group.appendChild(line1);
-        group.appendChild(line2);
+            group.appendChild(line1);
+            group.appendChild(line2);
 
-        canvas.appendChild(group);
-    }
+            canvas.appendChild(group);
+        }
 
-    function drawCircleSymbol(x, y) {
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        const radius = cellSideLength * 0.25;
+        function drawCircleSymbol(x, y) {
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            const radius = cellSideLength * 0.25;
 
-        circle.setAttribute("class", "circle");
-        circle.setAttribute("cx", x * cellSideLength + cellSideLength / 2);
-        circle.setAttribute("cy", y * cellSideLength + cellSideLength / 2);
-        circle.setAttribute("r", radius);
-        circle.setAttribute("fill", "none");
+            circle.setAttribute("class", "circle");
+            circle.setAttribute("cx", x * cellSideLength + cellSideLength / 2);
+            circle.setAttribute("cy", y * cellSideLength + cellSideLength / 2);
+            circle.setAttribute("r", radius);
+            circle.setAttribute("fill", "none");
 
-        canvas.appendChild(circle);
-    }
+            canvas.appendChild(circle);
+        }
 
-    function checkWin(symbol) {
-        for (let i = 0; i < 3; i++) {
-            if (board[i][0] === symbol &&
-                board[i][1] === symbol &&
-                board[i][2] === symbol) {
+        function checkWin(symbol) {
+            for (let i = 0; i < 3; i++) {
+                if (board[i][0] === symbol &&
+                    board[i][1] === symbol &&
+                    board[i][2] === symbol) {
+                    return true;
+                }
+
+                if (board[0][i] === symbol &&
+                    board[1][i] === symbol &&
+                    board[2][i] === symbol) {
+                    return true;
+                }
+            }
+
+            if (board[0][0] === symbol &&
+                board[1][1] === symbol &&
+                board[2][2] === symbol) {
                 return true;
             }
 
-            if (board[0][i] === symbol &&
-                board[1][i] === symbol &&
-                board[2][i] === symbol) {
+            if (board[0][2] === symbol &&
+                board[1][1] === symbol &&
+                board[2][0] === symbol) {
                 return true;
             }
+
+            return false;
         }
 
-        if (board[0][0] === symbol &&
-            board[1][1] === symbol &&
-            board[2][2] === symbol) {
-            return true;
+        function placeSymbol(x, y, symbol) {
+            if (symbol === 'X')
+                drawCrossSymbol(x, y);
+            else
+                drawCircleSymbol(x, y);
+
+            board[y][x] = symbol;
         }
 
-        if (board[0][2] === symbol &&
-            board[1][1] === symbol &&
-            board[2][0] === symbol) {
-            return true;
-        }
+        canvas.addEventListener('click', (event) => {
+            if (isGameOver) {
+                console.log('Game is over. Please refresh to play again.');
+                return;
+            }
 
-        return false;
-    }
+            const x = event.offsetX;
+            const y = event.offsetY;
 
-    function placeSymbol(x, y, symbol) {
-        if (symbol === 'X')
-            drawCrossSymbol(x, y);
-        else
-            drawCircleSymbol(x, y);
+            const cellX = Math.floor(x / cellSideLength);
+            const cellY = Math.floor(y / cellSideLength);
 
-        board[y][x] = symbol;
-    }
+            console.log(`Clicked on cell: (${cellX}, ${cellY})`);
 
-    canvas.addEventListener('click', (event) => {
-        if (isGameOver) {
-            console.log('Game is over. Please refresh to play again.');
-            return;
-        }
+            if (board[cellY][cellX] !== null) {
+                console.log('Cell already occupied!');
+                return;
+            }
 
-        const x = event.offsetX;
-        const y = event.offsetY;
+            let symbol = turn % 2 === 0 ? 'X' : 'O';
 
-        const cellX = Math.floor(x / cellSideLength);
-        const cellY = Math.floor(y / cellSideLength);
+            console.log(`Placing: ${symbol}`);
 
-        console.log(`Clicked on cell: (${cellX}, ${cellY})`);
+            placeSymbol(cellX, cellY, symbol);
 
-        if (board[cellY][cellX] !== null) {
-            console.log('Cell already occupied!');
-            return;
-        }
+            if (checkWin(symbol)) {
+                console.log(`Player ${symbol} wins!`);
+                isGameOver = true;
 
-        let symbol = turn % 2 === 0 ? 'X' : 'O';
+                getNextState(States.TTT_WON);
+            }
 
-        console.log(`Placing: ${symbol}`);
+            else if (board.flat().every(cell => cell !== null)) {
+                console.log("Oh no, Thobile. How did you manage to get a draw. I specifically programmed the computer to lose. Try again, or not.");
+                console.log('Draw!');
+                isGameOver = true;
 
-        placeSymbol(cellX, cellY, symbol);
+                getNextState(States.TTT_DRAW);
+            }
 
-        if (checkWin(symbol)) {
-            console.log(`Player ${symbol} wins!`);
-            isGameOver = true;
-
-            getNextState(States.TTT_WON);
-        }
-
-        else if (board.flat().every(cell => cell !== null)) {
-            console.log("Oh no, Thobile. How did you manage to get a draw. I specifically programmed the computer to lose. Try again, or not.");
-            console.log('Draw!');
-            isGameOver = true;
-
-            getNextState(States.TTT_DRAW);
-        }
-
-        turn++;
-    });
+            turn++;
+        });
+    })();
 </script>

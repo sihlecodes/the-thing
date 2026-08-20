@@ -1,0 +1,87 @@
+<style>
+    .hint {
+        position: absolute;
+        bottom: 20px;
+        font-size: .9em;
+        color: #888;
+    }
+
+    #options {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    #options li {
+        background-color: #e98ea6;
+        margin: 10px 0;
+        padding: 1.2em 3em;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    #options li:hover {
+        background-color: #d77c95;
+    }
+
+    #options li:active {
+        background-color: #c66b84;
+    }
+</style>
+
+<h1 id="heading"></h1>
+<h2 id="message"></h2>
+<ul id="options">
+</ul>
+
+<!-- TODO: implement tap and hold -->
+<span class="hint">tap the screen to continue</span>
+
+<script>
+    if (typeof quiz === 'undefined') {
+        var quiz = {
+            setHeading: function (heading) {
+                document.getElementById('heading').textContent = heading;
+            },
+
+            setMessage: function (message) {
+                document.getElementById('message').textContent = message;
+            },
+
+            setOptions: function (options) {
+                const optionsList = document.getElementById('options');
+                optionsList.innerHTML = '';
+
+                options.forEach((option, index) => {
+                    const li = document.createElement('li');
+
+                    if (index === 0)
+                        li.addEventListener('click', this.correctAnswerCallback);
+                    else
+                        li.addEventListener('click', this.wrongAnswerCallback);
+
+                    li.textContent = option;
+                    optionsList.appendChild(li);
+                });
+
+                // Shuffle the options
+                const optionItems = Array.from(optionsList.children);
+
+                for (let i = optionItems.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [optionItems[i], optionItems[j]] = [optionItems[j], optionItems[i]];
+                }
+
+                optionItems.forEach(option => optionsList.appendChild(option));
+            },
+
+            setCorrectAnswerCallback: function (callback) {
+                this.correctAnswerCallback = callback;
+            },
+
+            setWrongAnswerCallback: function (callback) {
+                this.wrongAnswerCallback = callback;
+            },
+        };
+    }
+</script>

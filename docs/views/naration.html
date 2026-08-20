@@ -14,15 +14,17 @@
 <span class="hint">tap the screen to continue</span>
 
 <script>
-    let naration = {
-        setHeading: function(heading) {
-            document.querySelector('h1').textContent = heading;
-        },
-        setMessage: function(message) {
-            document.querySelector('h2').textContent = message;
-        },
-        setCallback: function(callback) {
-            document.addEventListener('click', callback, { once: true });
-        }
-    };
+    if (typeof naration === 'undefined') {
+        var naration = {
+            setHeading: function (heading) {
+                document.querySelector('h1').textContent = heading;
+            },
+            setMessage: function (message) {
+                document.querySelector('h2').textContent = message;
+            },
+            setCallback: function (callback) {
+                document.addEventListener('click', callback, { once: true });
+            }
+        };
+    }
 </script>
