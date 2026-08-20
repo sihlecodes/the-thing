@@ -86,7 +86,10 @@ function getNextState(currentState) {
                 'You have completed the maze! Now answer this question to proceed.',
                 ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
                 () => { console.log('Correct answer!'); },
-                () => { console.log('Wrong answer!'); },
+                () => {
+                    console.log('Wrong answer!');
+                    window.location.reload();
+                },
             );
             break;
 

@@ -246,6 +246,9 @@
 
                     if (Math.abs(previousCell.x - currentCell.x) + Math.abs(previousCell.y - currentCell.y) !== 1) {
                         isValidDrag = false;
+                        lastValidCellIndex = previousCellIndex;
+                        return;
+
                     } else {
                         const previousCellProperties = maze[previousCell.y][previousCell.x];
                         const currentCellProperties = maze[currentCell.y][currentCell.x];
