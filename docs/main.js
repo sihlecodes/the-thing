@@ -66,8 +66,9 @@ function getNextState(currentState) {
                     console.log('Correct answer!');
                 },
                 () => {
-                    console.log('Wrong answer!');
-                    window.location.reload();
+                    showNaration('Wrong Answer',
+                        'You have answered the quiz incorrectly. Please try again.',
+                        () => { window.location.reload(); });
                 },
             );
             break;
@@ -85,10 +86,14 @@ function getNextState(currentState) {
             showQuiz('Maze Quiz',
                 'You have completed the maze! Now answer this question to proceed.',
                 ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
-                () => { console.log('Correct answer!'); },
                 () => {
-                    console.log('Wrong answer!');
-                    window.location.reload();
+                    window.location.href = 'https://wa.me/27633994508?text=Hello Sihle';
+                    console.log('Correct answer!');
+                },
+                () => {
+                    showNaration('Wrong Answer',
+                        'You have answered the quiz incorrectly. Please try again.',
+                        () => { window.location.reload(); });
                 },
             );
             break;
@@ -98,7 +103,7 @@ function getNextState(currentState) {
     }
 }
 
-loadPage('tic-tac-toe');
+// loadPage('tic-tac-toe');
 
 // showQuiz('Tic Tac Toe Quiz',
 //     'You have completed the game of Tic Tac Toe! Now answer this question to proceed.',
@@ -112,4 +117,4 @@ loadPage('tic-tac-toe');
 //     () => { console.log('Correct answer!'); },
 // );
 
-// loadPage('maze');
+loadPage('maze');

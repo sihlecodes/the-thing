@@ -1,5 +1,11 @@
-body {
+* {
     box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+}
+
+body {
     background-color: #fee9f6;
     margin: 0;
 }
@@ -11,4 +17,8 @@ body {
     justify-content:center;
     height: 100vh;
     padding: 0 20%;
+}
+
+canvas {
+    touch-action: none;
 }

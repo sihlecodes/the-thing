@@ -18,25 +18,25 @@
 
 <script>
     (function () {
-        const canvas = document.getElementById("canvas");
+        const canvas = document.getElementById('canvas');
 
         const width = window.innerWidth;
         const height = window.innerHeight;
 
         const canvasSideLength = Math.min(width, height) * 0.85;
 
-        canvas.setAttribute("width", canvasSideLength);
-        canvas.setAttribute("height", canvasSideLength);
+        canvas.setAttribute('width', canvasSideLength);
+        canvas.setAttribute('height', canvasSideLength);
 
-        const board = document.getElementById("board");
-        const boardOffset = window.getComputedStyle(board).getPropertyValue("stroke-width").replace("px", "") * 1;
+        const board = document.getElementById('board');
+        const boardOffset = window.getComputedStyle(board).getPropertyValue('stroke-width').replace('px', '') * 1;
 
         const boardSideLength = canvasSideLength - boardOffset * 2;
 
-        board.setAttribute("x", boardOffset);
-        board.setAttribute("y", boardOffset);
-        board.setAttribute("width", boardSideLength);
-        board.setAttribute("height", boardSideLength);
+        board.setAttribute('x', boardOffset);
+        board.setAttribute('y', boardOffset);
+        board.setAttribute('width', boardSideLength);
+        board.setAttribute('height', boardSideLength);
 
         const NONE = 0;
         const LEFT = 1;
@@ -88,15 +88,15 @@
             }
         }
 
-        function drawLine(x1, y1, x2, y2, { stroke = "black", strokeWidth = ".2em", pathGroup = null } = {}) {
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", x1);
-            line.setAttribute("y1", y1);
-            line.setAttribute("x2", x2);
-            line.setAttribute("y2", y2);
-            line.setAttribute("stroke", stroke);
-            line.setAttribute("stroke-width", strokeWidth);
-            line.setAttribute("stroke-linecap", "round");
+        function drawLine(x1, y1, x2, y2, { stroke = 'black', strokeWidth = '.2em', pathGroup = null } = {}) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', stroke);
+            line.setAttribute('stroke-width', strokeWidth);
+            line.setAttribute('stroke-linecap', 'round');
 
             if (pathGroup) {
                 pathGroup.appendChild(line);
@@ -129,20 +129,20 @@
                     drawLine(cellLeft, cellBottom, cellRight, cellBottom);
 
                 if (has(cellProperties, START)) {
-                    const startCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    startCircle.setAttribute("cx", cellLeft + cellWidth / 2);
-                    startCircle.setAttribute("cy", cellTop + cellHeight / 2);
-                    startCircle.setAttribute("r", Math.min(cellWidth, cellHeight) / 4);
-                    startCircle.setAttribute("fill", "mediumslateblue");
+                    const startCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    startCircle.setAttribute('cx', cellLeft + cellWidth / 2);
+                    startCircle.setAttribute('cy', cellTop + cellHeight / 2);
+                    startCircle.setAttribute('r', Math.min(cellWidth, cellHeight) / 4);
+                    startCircle.setAttribute('fill', 'mediumslateblue');
                     canvas.appendChild(startCircle);
                 }
 
                 if (has(cellProperties, GOAL)) {
-                    goalCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    goalCircle.setAttribute("cx", cellLeft + cellWidth / 2);
-                    goalCircle.setAttribute("cy", cellTop + cellHeight / 2);
-                    goalCircle.setAttribute("r", Math.min(cellWidth, cellHeight) / 4);
-                    goalCircle.setAttribute("fill", "gray");
+                    goalCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    goalCircle.setAttribute('cx', cellLeft + cellWidth / 2);
+                    goalCircle.setAttribute('cy', cellTop + cellHeight / 2);
+                    goalCircle.setAttribute('r', Math.min(cellWidth, cellHeight) / 4);
+                    goalCircle.setAttribute('fill', 'gray');
                     canvas.appendChild(goalCircle);
                 }
             }
@@ -152,12 +152,12 @@
 
         function cellToString(cell) {
             const properties = maze[cell.y][cell.x];
-            return `[${has(properties, LEFT) ? "L" : " "}${has(properties, RIGHT) ? "R" : " "}${has(properties, TOP) ? "T" : " "}${has(properties, BOTTOM) ? "B" : " "} ${has(properties, START) ? "S" : " "} ${has(properties, GOAL) ? "G" : " "} ]`;
+            return `[${has(properties, LEFT) ? 'L' : ' '}${has(properties, RIGHT) ? 'R' : ' '}${has(properties, TOP) ? 'T' : ' '}${has(properties, BOTTOM) ? 'B' : ' '} ${has(properties, START) ? 'S' : ' '} ${has(properties, GOAL) ? 'G' : ' '} ]`;
         }
 
         function debugMaze(maze) {
             for (let y = 0; y < maze.length; y++) {
-                let rowString = "";
+                let rowString = '';
                 for (let x = 0; x < maze[y].length; x++) {
                     const properties = maze[y][x];
                     const cellString = cellToString({ x, y });
@@ -199,7 +199,10 @@
         let currentCellIndex = null;
         let lastValidCellIndex = null;
 
-        canvas.addEventListener("mousedown", (event) => {
+        const pathGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        canvas.appendChild(pathGroup);
+
+        function onMouseDown(event) {
             const rect = board.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -213,12 +216,17 @@
                 currentCellIndex = getIndexFromCell(cell);
                 previousCellIndex = currentCellIndex;
             }
-        });
+        }
 
-        const pathGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        canvas.appendChild(pathGroup);
+        canvas.addEventListener('mousedown', onMouseDown);
+        canvas.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            const touch = event.touches[0];
+            onMouseDown(touch);
+        }, { passive: false });
 
-        canvas.addEventListener("mousemove", (event) => {
+        function onMouseMove(event) {
+            console.log(`Mouse moved: (${event.clientX}, ${event.clientY})`);
             const rect = board.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -232,7 +240,7 @@
 
                 // BUG: If the previous drag was invalid, we should not allow further drags until the mouse is either released or moved back to a valid cell.
                 if (!isValidDrag && currentCellIndex !== lastValidCellIndex) {
-                    console.log("Invalid drag: Previous drag was invalid, ignoring further drags");
+                    console.log('Invalid drag: Previous drag was invalid, ignoring further drags');
                     return;
                 }
                 isValidDrag = true;
@@ -276,8 +284,8 @@
                             previousCellCenterX, previousCellCenterY,
                             currentCellCenterX, currentCellCenterY,
                             {
-                                stroke: isValidDrag ? "mediumslateblue" : "red",
-                                strokeWidth: "3em",
+                                stroke: isValidDrag ? 'mediumslateblue' : 'red',
+                                strokeWidth: '3em',
                                 group: pathGroup
                             }
                         );
@@ -285,21 +293,28 @@
                         maze[currentCell.y][currentCell.x] |= PATH;
 
                         if (has(cellProperties, GOAL)) {
-                            goalCircle.setAttribute("fill", "mediumslateblue");
-                            console.log("Goal reached!");
+                            goalCircle.setAttribute('fill', 'mediumslateblue');
+                            console.log('Goal reached!');
                         }
                     }
                 }
             }
-        });
+        }
 
-        canvas.addEventListener("mouseup", (event) => {
+        canvas.addEventListener('mousemove', onMouseMove);
+        canvas.addEventListener('touchmove', (event) => {
+            event.preventDefault();
+            const touch = event.touches[0];
+            onMouseMove(touch);
+        }, { passive: false });
+
+        function onMouseUp(event) {
             const currentCell = getCellFromIndex(currentCellIndex);
             const cellProperties = maze[currentCell.y][currentCell.x];
 
             if (isValidDrag && has(cellProperties, GOAL)) {
-                goalCircle.setAttribute("fill", "mediumslateblue");
-                console.log("Goal reached!");
+                goalCircle.setAttribute('fill', 'mediumslateblue');
+                console.log('Goal reached!');
                 getNextState(States.MAZE_COMPLETE);
             }
 
@@ -307,7 +322,13 @@
             isValidDrag = true;
             previousCellIndex = null;
             currentCellIndex = null;
-            console.log("Dragging stopped");
-        });
+            console.log('Dragging stopped');
+        }
+
+        canvas.addEventListener('mouseup', onMouseUp);
+        canvas.addEventListener('touchend', (event) => {
+            event.preventDefault();
+            onMouseUp(event.changedTouches[0]);
+        }, { passive: false });
     })();
 </script>
