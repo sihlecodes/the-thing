@@ -1,7 +1,7 @@
 <style>
     .hint {
         position: absolute;
-        bottom: 20px;
+        bottom: 5%;
         font-size: .9em;
         color: #888;
     }
@@ -18,6 +18,9 @@
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.3s;
+        user-select: none;
+        -webkit-user-select: none;
+        /* outline: none; */
     }
 
     #options li:hover {
@@ -34,8 +37,7 @@
 <ul id="options">
 </ul>
 
-<!-- TODO: implement tap and hold -->
-<span class="hint">tap the screen to continue</span>
+<span class="hint">Choose an option from the list.</span>
 
 <script>
     if (typeof quiz === 'undefined') {

@@ -198,6 +198,7 @@
         let previousCellIndex = null;
         let currentCellIndex = null;
         let lastValidCellIndex = null;
+        let mazeComplete = false;
 
         const pathGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         canvas.appendChild(pathGroup);
@@ -285,7 +286,7 @@
                             currentCellCenterX, currentCellCenterY,
                             {
                                 stroke: isValidDrag ? 'mediumslateblue' : 'red',
-                                strokeWidth: '3em',
+                                strokeWidth: '8%',
                                 group: pathGroup
                             }
                         );
@@ -295,6 +296,7 @@
                         if (has(cellProperties, GOAL)) {
                             goalCircle.setAttribute('fill', 'mediumslateblue');
                             console.log('Goal reached!');
+                            mazeComplete = true;
                         }
                     }
                 }
@@ -312,9 +314,8 @@
             const currentCell = getCellFromIndex(currentCellIndex);
             const cellProperties = maze[currentCell.y][currentCell.x];
 
-            if (isValidDrag && has(cellProperties, GOAL)) {
-                goalCircle.setAttribute('fill', 'mediumslateblue');
-                console.log('Goal reached!');
+            if (mazeComplete) {
+                console.log('Maze completed!');
                 getNextState(States.MAZE_COMPLETE);
             }
 
