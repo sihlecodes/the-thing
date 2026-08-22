@@ -51,10 +51,16 @@
         let isGameOver = false;
         let turn = 0;
 
+        const Symbols = {
+            NONE: 0,
+            X: 1,
+            O: 2,
+        };
+
         let board = [
-            [null, null, null],
-            [null, null, null],
-            [null, null, null]
+            [Symbols.NONE, Symbols.NONE, Symbols.NONE],
+            [Symbols.NONE, Symbols.NONE, Symbols.NONE],
+            [Symbols.NONE, Symbols.NONE, Symbols.NONE]
         ];
 
         const computedStyle = window.getComputedStyle(document.documentElement);
@@ -107,33 +113,33 @@
                 if (board[i][0] === symbol &&
                     board[i][1] === symbol &&
                     board[i][2] === symbol) {
-                    return true;
+                    return { result: true, startCoord: [0, i], endCoord: [2, i] };
                 }
 
                 if (board[0][i] === symbol &&
                     board[1][i] === symbol &&
                     board[2][i] === symbol) {
-                    return true;
+                    return { result: true, startCoord: [i, 0], endCoord: [i, 2] };
                 }
             }
 
             if (board[0][0] === symbol &&
                 board[1][1] === symbol &&
                 board[2][2] === symbol) {
-                return true;
+                return { result: true, startCoord: [0, 0], endCoord: [2, 2] };
             }
 
             if (board[0][2] === symbol &&
                 board[1][1] === symbol &&
                 board[2][0] === symbol) {
-                return true;
+                return { result: true, startCoord: [2, 0], endCoord: [0, 2] };
             }
 
-            return false;
+            return { result: false };
         }
 
         function placeSymbol(x, y, symbol) {
-            if (symbol === 'X')
+            if (symbol === Symbols.X)
                 drawCrossSymbol(x, y);
             else
                 drawCircleSymbol(x, y);
@@ -141,7 +147,71 @@
             board[y][x] = symbol;
         }
 
-        canvas.addEventListener('click', (event) => {
+        async function playRulerAnimation(startCoord, endCoord) {
+            const [startX, startY] = startCoord;
+            const [endX, endY] = endCoord;
+
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", startX * cellSideLength + cellSideLength / 2);
+            line.setAttribute("y1", startY * cellSideLength + cellSideLength / 2);
+            line.setAttribute("x2", endX * cellSideLength + cellSideLength / 2);
+            line.setAttribute("y2", endY * cellSideLength + cellSideLength / 2);
+            line.setAttribute("stroke", "green");
+            line.setAttribute("stroke-width", "5%");
+
+            canvas.appendChild(line);
+
+            const steps = 30;
+            for (let step = 1; step <= steps; step++) {
+                const progress = step / steps;
+                const currentX = startX + (endX - startX) * progress;
+                const currentY = startY + (endY - startY) * progress;
+
+                line.setAttribute("x2", currentX * cellSideLength + cellSideLength / 2);
+                line.setAttribute("y2", currentY * cellSideLength + cellSideLength / 2);
+
+                await new Promise(resolve => setTimeout(resolve, 20));
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
+        function computeAIMove() {
+            const availableMoves = [];
+
+            for (let y = 0; y < 3; y++) {
+                for (let x = 0; x < 3; x++) {
+                    if (board[y][x] === Symbols.NONE) {
+                        availableMoves.push([x, y]);
+                    }
+                }
+            }
+
+            while (availableMoves.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableMoves.length);
+                const [x, y] = availableMoves[randomIndex];
+
+                if (board[y][x] === Symbols.NONE) {
+                    return [x, y];
+                } else {
+                    availableMoves.splice(randomIndex, 1);
+                }
+            }
+        }
+
+        function checkIfGoodMove(x, y) {
+            board[y][x] = Symbols.X;
+            const { result: aiResult } = checkWin(Symbols.X);
+            board[y][x] = Symbols.NONE;
+
+            board[y][x] = Symbols.O;
+            const { result: playerResult } = checkWin(Symbols.O);
+            board[y][x] = Symbols.NONE;
+
+            return aiResult || !playerResult;
+        }
+
+        canvas.addEventListener('click', async (event) => {
             if (isGameOver) {
                 console.log('Game is over. Please refresh to play again.');
                 return;
@@ -155,25 +225,28 @@
 
             console.log(`Clicked on cell: (${cellX}, ${cellY})`);
 
-            if (board[cellY][cellX] !== null) {
+            if (board[cellY][cellX] !== Symbols.NONE) {
                 console.log('Cell already occupied!');
                 return;
             }
 
-            let symbol = turn % 2 === 0 ? 'X' : 'O';
+            let symbol = turn % 2 === 0 ? Symbols.X : Symbols.O;
 
             console.log(`Placing: ${symbol}`);
-
             placeSymbol(cellX, cellY, symbol);
 
-            if (checkWin(symbol)) {
+            const { result } = checkWin(symbol);
+
+            if (result) {
                 console.log(`Player ${symbol} wins!`);
                 isGameOver = true;
 
+                const { startCoord, endCoord } = checkWin(symbol);
+                await playRulerAnimation(startCoord, endCoord);
                 getNextState(States.TTT_WON);
             }
 
-            else if (board.flat().every(cell => cell !== null)) {
+            else if (board.flat().every(symbol => symbol !== Symbols.NONE)) {
                 console.log("Oh no, Thobile. How did you manage to get a draw. I specifically programmed the computer to lose. Try again, or not.");
                 console.log('Draw!');
                 isGameOver = true;
