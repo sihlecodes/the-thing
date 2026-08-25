@@ -10,12 +10,18 @@
 <h1></h1>
 <h2></h2>
 
-<!-- TODO: implement tap and hold -->
-<span class="hint">tap the screen to continue</span>
+<span id="hint" class="hint">Tap and hold the screen to continue</span>
+
+<svg width="100" height="100" viewBox="0 0 100 100" style="position: absolute; top: -10vw;">
+    <path id="loader" d="M 10, 10 A 40,40 1 1,1 45, 90" fill="none" stroke="#e98ea683" stroke-width="12" stroke-linecap="round">
+    </path>
+</svg>
 
 <script>
     if (typeof naration === 'undefined') {
         var naration = {
+            callback: null,
+
             setHeading: function (heading) {
                 document.querySelector('h1').textContent = heading;
             },
@@ -23,8 +29,109 @@
                 document.querySelector('h2').textContent = message;
             },
             setCallback: function (callback) {
-                document.addEventListener('click', callback, { once: true });
-            }
+                this.callback = callback;
+                this.enableCallback();
+            },
+
+            enableCallback: function () {
+                document.addEventListener('mousedown', handleMouseDown);
+                document.addEventListener('touchstart', (event) => {
+                    event.preventDefault();
+                    handleMouseDown(event.touches[0]);
+                }, { passive: false });
+
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('touchmove', (event) => {
+                    event.preventDefault();
+                    handleMouseMove(event.touches[0]);
+                }, { passive: false });
+
+                document.addEventListener('mouseup', handleMouseUp);
+                document.addEventListener('touchend', handleMouseUp);
+            },
         };
+
+        let callbackActivated = false;
+        let activationTimerId = null;
+        let loaderIntervalId = null;
+
+        const startAngle = 3 * Math.PI / 2;
+
+        function updateLoaderProgress(cx, cy, radius, completion) {
+            const endAngle = startAngle + (completion) * 2 * Math.PI;
+
+            const startX = cx + radius * Math.cos(startAngle);
+            const startY = cy + radius * Math.sin(startAngle);
+            const endX = cx + radius * Math.cos(endAngle);
+            const endY = cy + radius * Math.sin(endAngle);
+
+            const angleDiff = Math.abs(endAngle - startAngle);
+            const largeArcFlag = angleDiff > Math.PI ? 1 : 0;
+
+            const pathData = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
+            document.querySelector('#loader').setAttribute('d', pathData);
+        }
+
+        function handleMouseDown(event) {
+            const loaderContainer = document.getElementById('loader').parentElement;
+            const containerRect = loaderContainer.getBoundingClientRect();
+
+            loaderContainer.style.left = `${event.clientX - containerRect.width/2}px`;
+            loaderContainer.style.top = `${event.clientY - containerRect.height/2}px`;
+
+            let progress = 0;
+
+            const start = performance.now();
+            const duration = 1000; // 1 second
+
+            if (naration.callback) {
+                activationTimerId = setTimeout(() => {
+                    callbackActivated = true;
+                    clearInterval(loaderIntervalId);
+                    console.log("Callback activated");
+                    document.getElementById('hint').textContent = "You can let go now :D";
+                }, duration);
+
+                loaderIntervalId = setInterval(() => {
+                    console.log("Loading...");
+                    const loader = document.getElementById('loader');
+                    const now = performance.now();
+
+                    progress = Math.min((now - start) / duration, 1);
+                    updateLoaderProgress(containerRect.width/2, containerRect.height/2, 40, progress);
+                }, 10);
+            }
+        }
+
+        function handleMouseMove(event) {
+            const loaderContainer = document.getElementById('loader').parentElement;
+            const containerRect = loaderContainer.getBoundingClientRect();
+
+            loaderContainer.style.left = `${event.clientX - containerRect.width/2}px`;
+            loaderContainer.style.top = `${event.clientY - containerRect.height/2}px`;
+        }
+
+        function handleMouseUp() {
+            clearTimeout(activationTimerId);
+            clearInterval(loaderIntervalId);
+
+            const loader = document.getElementById('loader');
+
+            if (loader)
+                loader.parentElement.style.left = '-10vw';
+
+            if (naration.callback && callbackActivated) {
+                // BUG: handlers aren't removed for some odd reason
+                document.removeEventListener('mousedown', handleMouseDown);
+                document.removeEventListener('touchstart', handleMouseDown);
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('touchmove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                document.removeEventListener('touchend', handleMouseUp);
+
+                naration.callback();
+                naration.callback = null;
+            }
+        }
     }
 </script>
