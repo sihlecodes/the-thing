@@ -34,14 +34,16 @@
         canvas.setAttribute('width', boardSideLength);
         canvas.setAttribute('height', boardSideLength);
 
-        const cellSideLength = boardSideLength / 3;
+        const rows = 3;
+        const columns = 3;
+        const cellSideLength = boardSideLength / rows;
 
-        for (let i = 1; i < 9; i += 2) {
+        for (let i = 1; i < rows * columns; i += 2) {
             const cell = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 
             cell.setAttribute("class", "alternate-cell");
-            cell.setAttribute("x", (i % 3) * cellSideLength);
-            cell.setAttribute("y", Math.floor(i / 3) * cellSideLength);
+            cell.setAttribute("x", (i % columns) * cellSideLength);
+            cell.setAttribute("y", Math.floor(i / columns) * cellSideLength);
             cell.setAttribute("width", cellSideLength);
             cell.setAttribute("height", cellSideLength);
 
@@ -57,11 +59,14 @@
             O: 2,
         };
 
-        let board = [
-            [Symbols.NONE, Symbols.NONE, Symbols.NONE],
-            [Symbols.NONE, Symbols.NONE, Symbols.NONE],
-            [Symbols.NONE, Symbols.NONE, Symbols.NONE]
-        ];
+        let board = [];
+
+        for (let i = 0; i < rows; i++) {
+            board.push([]);
+
+            for (let j = 0; j < columns; j++)
+                board[i].push(Symbols.NONE);
+        }
 
         const computedStyle = window.getComputedStyle(document.documentElement);
         const crossColour = computedStyle.getPropertyValue('--cross-colour').trim();
@@ -109,7 +114,7 @@
         }
 
         function checkWin(symbol) {
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < rows; i++) {
                 if (board[i][0] === symbol &&
                     board[i][1] === symbol &&
                     board[i][2] === symbol) {
@@ -147,6 +152,11 @@
             board[y][x] = symbol;
         }
 
+        function placeSymbolAndAdvanceTurn(x, y, symbol) {
+            placeSymbol(x, y, symbol);
+            turn++;
+        }
+
         async function playRulerAnimation(startCoord, endCoord) {
             const [startX, startY] = startCoord;
             const [endX, endY] = endCoord;
@@ -179,37 +189,36 @@
         function computeAIMove() {
             const availableMoves = [];
 
-            for (let y = 0; y < 3; y++) {
-                for (let x = 0; x < 3; x++) {
-                    if (board[y][x] === Symbols.NONE) {
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < columns; x++) {
+                    if (board[y][x] === Symbols.NONE)
                         availableMoves.push([x, y]);
-                    }
                 }
             }
 
-            while (availableMoves.length > 0) {
-                const randomIndex = Math.floor(Math.random() * availableMoves.length);
-                const [x, y] = availableMoves[randomIndex];
+            const badMoves = availableMoves.filter(([x, y]) => !checkIfGoodMove(x, y));
 
-                if (board[y][x] === Symbols.NONE) {
-                    return [x, y];
-                } else {
-                    availableMoves.splice(randomIndex, 1);
-                }
-            }
+            // intentionally make bad moves
+            if (badMoves.length > 0)
+                return badMoves[Math.floor(Math.random() * badMoves.length)];
+
+            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
         }
 
         function checkIfGoodMove(x, y) {
             board[y][x] = Symbols.X;
-            const { result: aiResult } = checkWin(Symbols.X);
+            const aiResult = checkWin(Symbols.X).result;
             board[y][x] = Symbols.NONE;
 
             board[y][x] = Symbols.O;
-            const { result: playerResult } = checkWin(Symbols.O);
+            const playerResult = checkWin(Symbols.O).result;
             board[y][x] = Symbols.NONE;
 
-            return aiResult || !playerResult;
+            return aiResult || playerResult;
         }
+
+        const aiSymbol = Symbols.X;
+        const playerSymbol = Symbols.O;
 
         canvas.addEventListener('click', async (event) => {
             if (isGameOver) {
@@ -230,31 +239,43 @@
                 return;
             }
 
-            let symbol = turn % 2 === 0 ? Symbols.X : Symbols.O;
+            placeSymbolAndAdvanceTurn(cellX, cellY, playerSymbol);
 
-            console.log(`Placing: ${symbol}`);
-            placeSymbol(cellX, cellY, symbol);
+            let { result: playerMoveResult, startCoord, endCoord } = checkWin(playerSymbol);
+            let aiMoveResult = false;
 
-            const { result } = checkWin(symbol);
+            if (!playerMoveResult && turn < rows * columns) {
+                placeSymbolAndAdvanceTurn(...computeAIMove(), aiSymbol);
+                ({ result: aiMoveResult, startCoord, endCoord } = checkWin(aiSymbol));
+            }
 
-            if (result) {
-                console.log(`Player ${symbol} wins!`);
+            if (playerMoveResult) {
+                console.log(`Player wins!`);
                 isGameOver = true;
 
-                const { startCoord, endCoord } = checkWin(symbol);
+                const { startCoord, endCoord } = checkWin(playerSymbol);
                 await playRulerAnimation(startCoord, endCoord);
                 getNextState(States.TTT_WON);
             }
 
-            else if (board.flat().every(symbol => symbol !== Symbols.NONE)) {
-                console.log("Oh no, Thobile. How did you manage to get a draw. I specifically programmed the computer to lose. Try again, or not.");
-                console.log('Draw!');
+            else if (aiMoveResult) {
+                console.log(`AI wins!`);
+                isGameOver = true;
+
+                const { startCoord, endCoord } = checkWin(aiSymbol);
+                await playRulerAnimation(startCoord, endCoord);
+                getNextState(States.TTT_LOST);
+            }
+
+            else if (turn >= rows * columns) {
+                console.log("Player: Oh no, Thobile. How did you manage to get a draw. I specifically programmed the computer to lose. Try again, or not.");
                 isGameOver = true;
 
                 getNextState(States.TTT_DRAW);
             }
-
-            turn++;
         });
+
+        // make opening move
+        placeSymbolAndAdvanceTurn(...computeAIMove(), aiSymbol);
     })();
 </script>

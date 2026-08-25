@@ -2,8 +2,9 @@ const States = Object.freeze({
     TTT_WON: 1,
     TTT_DRAW: 2,
     TTT_QUIZ: 3,
-    MAZE_COMPLETE: 4,
-    MAZE_QUIZ: 5,
+    TTT_LOST: 4,
+    MAZE_COMPLETE: 5,
+    MAZE_QUIZ: 6,
 });
 
 async function loadPage(pageName) {
@@ -45,6 +46,13 @@ function getNextState(currentState) {
                 getNextState(States.TTT_QUIZ);
                 console.log('done!');
                 console.log('calling back from ttt won');
+            });
+
+            break;
+
+        case States.TTT_LOST:
+            showNaration('Oh no Thobile', 'You have lost the game of Tic Tac Toe', () => {
+                window.location.reload();
             });
 
             break;
