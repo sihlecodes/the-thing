@@ -13,13 +13,13 @@
 <span id="hint" class="hint">Tap and hold the screen to continue</span>
 
 <svg width="100" height="100" viewBox="0 0 100 100" style="position: absolute; top: -10vw;">
-    <path id="loader" d="M 10, 10 A 40,40 1 1,1 45, 90" fill="none" stroke="#e98ea683" stroke-width="12" stroke-linecap="round">
+    <path id="loader" fill="none" stroke="#e98ea683" stroke-width="12" stroke-linecap="round">
     </path>
 </svg>
 
 <script>
-    if (typeof naration === 'undefined') {
-        var naration = {
+    if (typeof narration === 'undefined') {
+        var narration = {
             callback: null,
 
             setHeading: function (heading) {
@@ -51,9 +51,9 @@
             },
         };
 
-        let callbackActivated = false;
-        let activationTimerId = null;
-        let loaderIntervalId = null;
+        let callbackActivated;
+        let activationTimerId;
+        let loaderIntervalId;
 
         const startAngle = 3 * Math.PI / 2;
 
@@ -73,6 +73,10 @@
         }
 
         function handleMouseDown(event) {
+            callbackActivated = false;
+            activationTimerId = null;
+            loaderIntervalId = null;
+
             const loaderContainer = document.getElementById('loader').parentElement;
             const containerRect = loaderContainer.getBoundingClientRect();
 
@@ -82,9 +86,9 @@
             let progress = 0;
 
             const start = performance.now();
-            const duration = 1000; // 1 second
+            const duration = 1000;
 
-            if (naration.callback) {
+            if (narration.callback) {
                 activationTimerId = setTimeout(() => {
                     callbackActivated = true;
                     clearInterval(loaderIntervalId);
@@ -97,7 +101,7 @@
                     const loader = document.getElementById('loader');
                     const now = performance.now();
 
-                    progress = Math.min((now - start) / duration, 1);
+                    progress = Math.min((now - start) / duration, 0.99);
                     updateLoaderProgress(containerRect.width/2, containerRect.height/2, 40, progress);
                 }, 10);
             }
@@ -120,8 +124,7 @@
             if (loader)
                 loader.parentElement.style.left = '-10vw';
 
-            if (naration.callback && callbackActivated) {
-                // BUG: handlers aren't removed for some odd reason
+            if (narration.callback && callbackActivated) {
                 document.removeEventListener('mousedown', handleMouseDown);
                 document.removeEventListener('touchstart', handleMouseDown);
                 document.removeEventListener('mousemove', handleMouseMove);
@@ -129,9 +132,11 @@
                 document.removeEventListener('mouseup', handleMouseUp);
                 document.removeEventListener('touchend', handleMouseUp);
 
-                naration.callback();
-                naration.callback = null;
+                narration.callback();
+                narration.callback = null;
             }
+
+            loader.removeAttribute('d');
         }
     }
 </script>

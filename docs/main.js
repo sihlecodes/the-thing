@@ -18,11 +18,11 @@ async function loadPage(pageName) {
 }
 
 async function showNaration(heading, message, callback) {
-    await loadPage('naration');
+    await loadPage('narration');
 
-    naration.setHeading(heading);
-    naration.setMessage(message);
-    naration.setCallback(callback);
+    narration.setHeading(heading);
+    narration.setMessage(message);
+    narration.setCallback(callback);
 };
 
 async function showQuiz(heading, message, options, correctAnswerCallback, wrongAnswerCallback) {
