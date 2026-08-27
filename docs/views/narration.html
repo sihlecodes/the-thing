@@ -19,6 +19,10 @@
 
 <script>
     if (typeof narration === 'undefined') {
+        let touchStartHandler = null;
+        let touchMoveHandler = null;
+        let touchEndHandler = null;
+
         var narration = {
             callback: null,
 
@@ -34,20 +38,29 @@
             },
 
             enableCallback: function () {
-                document.addEventListener('mousedown', handleMouseDown);
-                document.addEventListener('touchstart', (event) => {
+                touchStartHandler = (event) => {
                     event.preventDefault();
                     handleMouseDown(event.touches[0]);
-                }, { passive: false });
+                };
 
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('touchmove', (event) => {
+                touchMoveHandler = (event) => {
                     event.preventDefault();
                     handleMouseMove(event.touches[0]);
-                }, { passive: false });
+                };
+
+                touchEndHandler = (event) => {
+                    event.preventDefault();
+                    handleMouseUp();
+                };
+
+                document.addEventListener('mousedown', handleMouseDown);
+                document.addEventListener('touchstart', touchStartHandler, { passive: false });
+
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('touchmove', touchMoveHandler, { passive: false });
 
                 document.addEventListener('mouseup', handleMouseUp);
-                document.addEventListener('touchend', handleMouseUp);
+                document.addEventListener('touchend', touchEndHandler, { passive: false });
             },
         };
 
@@ -125,15 +138,19 @@
                 loader.parentElement.style.left = '-10vw';
 
             if (narration.callback && callbackActivated) {
+                console.log('callback activated, cleaning up');
                 document.removeEventListener('mousedown', handleMouseDown);
-                document.removeEventListener('touchstart', handleMouseDown);
+                document.removeEventListener('touchstart', touchStartHandler);
                 document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('touchmove', handleMouseMove);
+                document.removeEventListener('touchmove', touchMoveHandler);
                 document.removeEventListener('mouseup', handleMouseUp);
-                document.removeEventListener('touchend', handleMouseUp);
+                document.removeEventListener('touchend', touchEndHandler);
 
                 narration.callback();
                 narration.callback = null;
+                touchStartHandler = null;
+                touchMoveHandler = null;
+                touchEndHandler = null;
             }
 
             loader.removeAttribute('d');
