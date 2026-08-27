@@ -111,7 +111,7 @@ function getNextState(currentState) {
     }
 }
 
-loadPage('tic-tac-toe');
+// loadPage('tic-tac-toe');
 
 // showQuiz('Tic Tac Toe Quiz',
 //     'You have completed the game of Tic Tac Toe! Now answer this question to proceed.',
@@ -125,4 +125,4 @@ loadPage('tic-tac-toe');
 //     () => { console.log('Correct answer!'); },
 // );
 
-// loadPage('maze');
+loadPage('maze');

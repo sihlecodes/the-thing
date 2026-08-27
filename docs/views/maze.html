@@ -52,7 +52,7 @@
 
         let maze = [
             [NONE, BOTTOM, NONE],
-            [BOTTOM, RIGHT, LEFT],
+            [NONE, RIGHT, LEFT],
             [NONE | START, NONE, LEFT | GOAL],
         ];
 
@@ -298,7 +298,7 @@
                 previousCellIndex = lastValidCellIndex;
             }
 
-            if (previousCellIndex !== null && previousCellIndex !== currentCellIndex) {
+            if (previousCellIndex !== currentCellIndex) {
                 const previousCell = getCellFromIndex(previousCellIndex);
 
                 console.log('Previous cell:');
@@ -317,17 +317,17 @@
                 const previousCellProperties = maze[previousCell.y][previousCell.x];
                 const currentCellProperties = maze[currentCell.y][currentCell.x];
 
+                if (pathGroup.childNodes.length > 1 && has(currentCellProperties, START)) {
+                    isValidDrag = false;
+                    lastValidCellIndex = previousCellIndex;
+                    return;
+                }
+
                 if (isBacktracking) {
                     maze[previousCell.y][previousCell.x] &= ~PATH;
 
                     pathGroup.removeChild(pathGroup.lastChild);
                     indexesAlongPath.pop();
-                }
-
-                if (pathGroup.hasChildNodes() && has(currentCellProperties, START)) {
-                    isValidDrag = false;
-                    lastValidCellIndex = previousCellIndex;
-                    return;
                 }
 
                 if ((previousCell.x < currentCell.x && has(previousCellProperties, RIGHT)) ||
