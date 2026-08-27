@@ -88,7 +88,7 @@
             }
         }
 
-        function drawLine(x1, y1, x2, y2, { stroke = 'black', strokeWidth = '.2em', pathGroup = null } = {}) {
+        function drawLine(x1, y1, x2, y2, { stroke = 'black', strokeWidth = '.2em', group = null } = {}) {
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', x1);
             line.setAttribute('y1', y1);
@@ -98,11 +98,10 @@
             line.setAttribute('stroke-width', strokeWidth);
             line.setAttribute('stroke-linecap', 'round');
 
-            if (pathGroup) {
-                pathGroup.appendChild(line);
-            } else {
+            if (group !== null)
+                group.appendChild(line);
+            else
                 canvas.appendChild(line);
-            }
         }
 
         let goalCircle = null;
@@ -152,7 +151,25 @@
 
         function cellToString(cell) {
             const properties = maze[cell.y][cell.x];
-            return `[${has(properties, LEFT) ? 'L' : ' '}${has(properties, RIGHT) ? 'R' : ' '}${has(properties, TOP) ? 'T' : ' '}${has(properties, BOTTOM) ? 'B' : ' '} ${has(properties, START) ? 'S' : ' '} ${has(properties, GOAL) ? 'G' : ' '} ]`;
+
+            let result = '[';
+
+            if (has(properties, LEFT)) result += 'L';
+            else result += ' ';
+            if (has(properties, RIGHT)) result += 'R';
+            else result += ' ';
+            if (has(properties, TOP)) result += 'T';
+            else result += ' ';
+            if (has(properties, BOTTOM)) result += 'B';
+            else result += ' ';
+            if (has(properties, START)) result += 'S';
+            else result += ' ';
+            if (has(properties, GOAL)) result += 'G';
+            else result += ' ';
+            if (has(properties, PATH)) result += 'P';
+            else result += ' ';
+
+            return result + ']';
         }
 
         function debugMaze(maze) {
@@ -199,6 +216,7 @@
         let currentCellIndex = null;
         let lastValidCellIndex = null;
         let mazeComplete = false;
+        let indexesAlongPath = [];
 
         const pathGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         canvas.appendChild(pathGroup);
@@ -211,7 +229,19 @@
             const cell = getCellFromCoordinates(x, y);
             const cellProperties = cell ? maze[cell.y][cell.x] : 0;
 
-            if (cell && has(cellProperties, START | PATH)) {
+            if (!cell)
+                return;
+
+            const cellIndex = getIndexFromCell(cell);
+            const isStart = has(cellProperties, START);
+
+            if (isStart && !pathGroup.hasChildNodes() ||
+                has(cellProperties, PATH) &&
+                indexesAlongPath[indexesAlongPath.length - 1] === cellIndex)
+            {
+                if (has(cellProperties, START))
+                    maze[cell.y][cell.x] |= PATH;
+
                 console.log(`Dragging started on cell: (${cell.x}, ${cell.y})`);
                 isDragging = true;
                 currentCellIndex = getIndexFromCell(cell);
@@ -227,83 +257,114 @@
         }, { passive: false });
 
         function onMouseMove(event) {
+            if (mazeComplete || !isDragging)
+                return;
+
             const rect = board.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
             const currentCell = getCellFromCoordinates(x, y);
 
-            if (currentCell && isDragging) {
-                previousCellIndex = currentCellIndex;
-                currentCellIndex = getIndexFromCell(currentCell);
+            let isBacktracking;
 
-                if (!isValidDrag && currentCellIndex !== lastValidCellIndex) {
+            if (!currentCell)
+                return;
+
+            const newCurrentCellIndex = getIndexFromCell(currentCell);
+
+            if (newCurrentCellIndex === currentCellIndex)
+                return;
+
+            isBacktracking = has(maze[currentCell.y][currentCell.x], PATH);
+
+            if (isBacktracking) {
+                console.log('Backtracking detected');
+            }
+
+            previousCellIndex = currentCellIndex;
+            currentCellIndex = newCurrentCellIndex;
+
+            if (!isValidDrag) {
+                if (currentCellIndex !== lastValidCellIndex) {
                     if (currentCellIndex !== previousCellIndex)
                         console.log('Invalid drag: Previous drag was invalid, ignoring further drags');
 
                     return;
                 }
-                else if (!isValidDrag) {
-                    console.log('valid again!');
-                    isValidDrag = true;
-                    previousCellIndex = lastValidCellIndex;
+
+                console.log('valid again!');
+                isValidDrag = true;
+                previousCellIndex = lastValidCellIndex;
+            }
+
+            if (previousCellIndex !== null && previousCellIndex !== currentCellIndex) {
+                const previousCell = getCellFromIndex(previousCellIndex);
+
+                console.log('Previous cell:');
+                debugCell(previousCell);
+
+                console.log('Current cell:');
+                debugCell(currentCell);
+
+                if (Math.abs(previousCell.x - currentCell.x) + Math.abs(previousCell.y - currentCell.y) !== 1) {
+                    isValidDrag = false;
+                    lastValidCellIndex = previousCellIndex;
+                    return;
+
                 }
 
-                if (previousCellIndex !== null && previousCellIndex !== currentCellIndex) {
-                    const previousCell = getCellFromIndex(previousCellIndex);
+                const previousCellProperties = maze[previousCell.y][previousCell.x];
+                const currentCellProperties = maze[currentCell.y][currentCell.x];
 
-                    console.log('Previous cell:');
-                    debugCell(previousCell);
+                if (isBacktracking) {
+                    maze[previousCell.y][previousCell.x] &= ~PATH;
 
-                    console.log('Current cell:');
-                    debugCell(currentCell);
+                    pathGroup.removeChild(pathGroup.lastChild);
+                    indexesAlongPath.pop();
+                }
 
-                    if (Math.abs(previousCell.x - currentCell.x) + Math.abs(previousCell.y - currentCell.y) !== 1) {
-                        isValidDrag = false;
-                        lastValidCellIndex = previousCellIndex;
-                        return;
+                if (pathGroup.hasChildNodes() && has(currentCellProperties, START)) {
+                    isValidDrag = false;
+                    lastValidCellIndex = previousCellIndex;
+                    return;
+                }
 
-                    } else {
-                        const previousCellProperties = maze[previousCell.y][previousCell.x];
-                        const currentCellProperties = maze[currentCell.y][currentCell.x];
+                if ((previousCell.x < currentCell.x && has(previousCellProperties, RIGHT)) ||
+                    (previousCell.x > currentCell.x && has(previousCellProperties, LEFT)) ||
+                    (previousCell.y < currentCell.y && has(previousCellProperties, BOTTOM)) ||
+                    (previousCell.y > currentCell.y && has(previousCellProperties, TOP))) {
+                    isValidDrag = false;
+                    lastValidCellIndex = previousCellIndex;
+                    return;
+                }
 
-                        if ((previousCell.x < currentCell.x && has(previousCellProperties, RIGHT)) ||
-                            (previousCell.x > currentCell.x && has(previousCellProperties, LEFT)) ||
-                            (previousCell.y < currentCell.y && has(previousCellProperties, BOTTOM)) ||
-                            (previousCell.y > currentCell.y && has(previousCellProperties, TOP))) {
-                            isValidDrag = false;
-                            lastValidCellIndex = previousCellIndex;
-                            return;
-                        }
+                if (isBacktracking)
+                    return;
+
+                const previousCellCenterX = boardOffset + previousCell.x * cellWidth + cellWidth / 2;
+                const previousCellCenterY = boardOffset + previousCell.y * cellHeight + cellHeight / 2;
+
+                const currentCellCenterX = boardOffset + currentCell.x * cellWidth + cellWidth / 2;
+                const currentCellCenterY = boardOffset + currentCell.y * cellHeight + cellHeight / 2;
+
+                drawLine(
+                    previousCellCenterX, previousCellCenterY,
+                    currentCellCenterX, currentCellCenterY,
+                    {
+                        stroke: isValidDrag ? 'mediumslateblue' : 'red',
+                        strokeWidth: '8%',
+                        group: pathGroup
                     }
+                );
 
-                    const previousCellCenterX = boardOffset + previousCell.x * cellWidth + cellWidth / 2;
-                    const previousCellCenterY = boardOffset + previousCell.y * cellHeight + cellHeight / 2;
+                indexesAlongPath.push(currentCellIndex);
+                maze[currentCell.y][currentCell.x] |= PATH;
 
-                    const currentCellCenterX = boardOffset + currentCell.x * cellWidth + cellWidth / 2;
-                    const currentCellCenterY = boardOffset + currentCell.y * cellHeight + cellHeight / 2;
-
-                    const cellProperties = maze[currentCell.y][currentCell.x];
-
-                    if (!has(cellProperties, PATH)) {
-                        drawLine(
-                            previousCellCenterX, previousCellCenterY,
-                            currentCellCenterX, currentCellCenterY,
-                            {
-                                stroke: isValidDrag ? 'mediumslateblue' : 'red',
-                                strokeWidth: '8%',
-                                group: pathGroup
-                            }
-                        );
-
-                        maze[currentCell.y][currentCell.x] |= PATH;
-
-                        if (has(cellProperties, GOAL)) {
-                            goalCircle.setAttribute('fill', 'mediumslateblue');
-                            console.log('Goal reached!');
-                            mazeComplete = true;
-                        }
-                    }
+                if (has(currentCellProperties, GOAL)) {
+                    goalCircle.setAttribute('fill', 'mediumslateblue');
+                    console.log('Goal reached!');
+                    mazeComplete = true;
                 }
             }
         }
