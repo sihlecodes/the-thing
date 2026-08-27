@@ -227,7 +227,6 @@
         }, { passive: false });
 
         function onMouseMove(event) {
-            console.log(`Mouse moved: (${event.clientX}, ${event.clientY})`);
             const rect = board.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -237,20 +236,26 @@
             if (currentCell && isDragging) {
                 previousCellIndex = currentCellIndex;
                 currentCellIndex = getIndexFromCell(currentCell);
-                console.log(`Dragging over cell: (${currentCell.x}, ${currentCell.y})`);
 
-                // BUG: If the previous drag was invalid, we should not allow further drags until the mouse is either released or moved back to a valid cell.
                 if (!isValidDrag && currentCellIndex !== lastValidCellIndex) {
-                    console.log('Invalid drag: Previous drag was invalid, ignoring further drags');
+                    if (currentCellIndex !== previousCellIndex)
+                        console.log('Invalid drag: Previous drag was invalid, ignoring further drags');
+
                     return;
                 }
-                isValidDrag = true;
+                else if (!isValidDrag) {
+                    console.log('valid again!');
+                    isValidDrag = true;
+                    previousCellIndex = lastValidCellIndex;
+                }
 
                 if (previousCellIndex !== null && previousCellIndex !== currentCellIndex) {
                     const previousCell = getCellFromIndex(previousCellIndex);
 
-                    console.log(`Previous cell: (${previousCell.x}, ${previousCell.y}), Current cell: (${currentCell.x}, ${currentCell.y})`);
+                    console.log('Previous cell:');
                     debugCell(previousCell);
+
+                    console.log('Current cell:');
                     debugCell(currentCell);
 
                     if (Math.abs(previousCell.x - currentCell.x) + Math.abs(previousCell.y - currentCell.y) !== 1) {
