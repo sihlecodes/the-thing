@@ -10,11 +10,20 @@
         fill: black;
         stroke: black;
     }
+    #maze-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+    }
 </style>
 
+<div id="maze-container">
 <svg id="canvas">
     <rect id="board" />
 </svg>
+</div>
 
 <script>
     (function () {
@@ -392,8 +401,10 @@
             console.log('Dragging stopped');
         }
 
-        canvas.addEventListener('mouseup', onMouseUp);
-        canvas.addEventListener('touchend', (event) => {
+        const mazeContainer = document.getElementById('maze-container');
+
+        mazeContainer.addEventListener('mouseup', onMouseUp);
+        mazeContainer.addEventListener('touchend', (event) => {
             event.preventDefault();
             onMouseUp(event.changedTouches[0]);
         }, { passive: false });
