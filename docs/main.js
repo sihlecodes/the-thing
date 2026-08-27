@@ -95,8 +95,12 @@ function getNextState(currentState) {
                 'You have completed the maze! Now answer this question to proceed.',
                 ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
                 () => {
-                    window.location.href = 'https://wa.me/27633994508?text=Hello Sihle';
-                    console.log('Correct answer!');
+                    showNaration('Final Quiz',
+                        'You have completed the maze! Now answer this final question to proceed.',
+                        () => {
+                            window.location.href = 'https://wa.me/27633994508?text=Hello Sihle';
+                            console.log('Correct answer!')
+                        });
                 },
                 () => {
                     showNaration('Wrong Answer',

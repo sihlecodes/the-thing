@@ -1,11 +1,4 @@
-<style>
-    .hint {
-        position: absolute;
-        bottom: 20px;
-        font-size: .9em;
-        color: #888;
-    }
-</style>
+<link rel="stylesheet" href="main.css">
 
 <h1></h1>
 <h2></h2>
@@ -31,6 +24,9 @@
             },
             setMessage: function (message) {
                 document.querySelector('h2').textContent = message;
+            },
+            setHint: function (hint) {
+                document.getElementById('hint').textContent = hint;
             },
             setCallback: function (callback) {
                 this.callback = callback;
@@ -106,7 +102,7 @@
                     callbackActivated = true;
                     clearInterval(loaderIntervalId);
                     console.log("Callback activated");
-                    document.getElementById('hint').textContent = "You can let go now :D";
+                    narration.setHint("You can let go now :D");
                 }, duration);
 
                 loaderIntervalId = setInterval(() => {
