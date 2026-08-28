@@ -62,9 +62,14 @@
         const PATH = 128;
 
         let maze = [
-            [NONE, BOTTOM, NONE],
-            [NONE, RIGHT, LEFT],
-            [NONE | START, NONE, LEFT | GOAL],
+            [NONE,  BOTTOM, BOTTOM, BOTTOM, BOTTOM, BOTTOM, BOTTOM, NONE],
+            [RIGHT, NONE, BOTTOM, BOTTOM, NONE, NONE, BOTTOM, LEFT],
+            [RIGHT, NONE, LEFT, BOTTOM, BOTTOM, LEFT, LEFT, BOTTOM],
+            [RIGHT, RIGHT, LEFT, LEFT, NONE, LEFT | BOTTOM, NONE, LEFT],
+            [RIGHT, NONE, LEFT, LEFT, LEFT | TOP, NONE, RIGHT | BOTTOM, NONE],
+            [RIGHT, NONE, LEFT | BOTTOM, BOTTOM, LEFT, BOTTOM | LEFT, BOTTOM, NONE],
+            [RIGHT, GOAL | BOTTOM, LEFT, NONE, BOTTOM | LEFT, BOTTOM, RIGHT | BOTTOM, NONE],
+            [NONE,  NONE, START | TOP | RIGHT, NONE, NONE, NONE, NONE, NONE],
         ];
 
         const rows = maze.length;
@@ -125,6 +130,16 @@
                 const cellRight = cellLeft + cellWidth;
                 const cellTop = boardOffset + cellHeight * y;
                 const cellBottom = cellTop + cellHeight;
+
+                // const style = {
+                //     stroke: 'red',
+                //     strokeWidth: '.2px',
+                // }
+
+                // drawLine(cellLeft, cellTop, cellLeft, cellBottom, style);
+                // drawLine(cellRight, cellTop, cellRight, cellBottom, style);
+                // drawLine(cellLeft, cellTop, cellRight, cellTop, style);
+                // drawLine(cellLeft, cellBottom, cellRight, cellBottom, style);
 
                 if (has(cellProperties, LEFT))
                     drawLine(cellLeft, cellTop, cellLeft, cellBottom);
