@@ -17,12 +17,13 @@ async function loadPage(pageName) {
     content.appendChild(fragment);
 }
 
-async function showNaration(heading, message, callback) {
+async function showNaration(heading, message, callback, holdDuration = 1000) {
     await loadPage('narration');
 
     narration.setHeading(heading);
     narration.setMessage(message);
     narration.setCallback(callback);
+    narration.setHoldDuration(holdDuration);
 };
 
 async function showQuiz(heading, message, options, correctAnswerCallback, wrongAnswerCallback) {
@@ -100,7 +101,7 @@ function getNextState(currentState) {
                         () => {
                             window.location.href = 'https://wa.me/27633994508?text=Hello Sihle';
                             console.log('Correct answer!')
-                        });
+                        }, 3000);
                 },
                 () => {
                     showNaration('Wrong Answer',

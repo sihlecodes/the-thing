@@ -18,6 +18,7 @@
 
         var narration = {
             callback: null,
+            holdDuration: 1000,
 
             setHeading: function (heading) {
                 document.querySelector('h1').textContent = heading;
@@ -28,11 +29,13 @@
             setHint: function (hint) {
                 document.getElementById('hint').textContent = hint;
             },
+            setHoldDuration: function (duration) {
+                this.holdDuration = duration;
+            },
             setCallback: function (callback) {
                 this.callback = callback;
                 this.enableCallback();
             },
-
             enableCallback: function () {
                 touchStartHandler = (event) => {
                     event.preventDefault();
@@ -95,7 +98,7 @@
             let progress = 0;
 
             const start = performance.now();
-            const duration = 1000;
+            const duration = narration.holdDuration;
 
             if (narration.callback) {
                 activationTimerId = setTimeout(() => {
