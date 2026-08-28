@@ -2,9 +2,15 @@ body {
     background-color: #fee9f6;
     user-select: none;
     margin: 0;
+    cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    cursor: pointer;
+}
+
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #content {
@@ -13,6 +19,7 @@ body {
     align-items:center;
     justify-content:center;
     height: 100vh;
+    height: 100dvh;
     padding: 0 20%;
 }
 
