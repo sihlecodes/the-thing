@@ -159,7 +159,7 @@
             turn++;
         }
 
-        async function playRulerAnimation(startCoord, endCoord) {
+        function playRulerAnimation(startCoord, endCoord, duration = 1000) {
             const [startX, startY] = startCoord;
             const [endX, endY] = endCoord;
 
@@ -173,19 +173,27 @@
 
             canvas.appendChild(line);
 
-            const steps = 30;
-            for (let step = 1; step <= steps; step++) {
-                const progress = step / steps;
-                const currentX = startX + (endX - startX) * progress;
-                const currentY = startY + (endY - startY) * progress;
+            return new Promise(resolve => {
+                const start = performance.now();
 
-                line.setAttribute("x2", currentX * cellSideLength + cellSideLength / 2);
-                line.setAttribute("y2", currentY * cellSideLength + cellSideLength / 2);
+                function animate(now) {
+                    const t = Math.min((now - start) / duration, 1);
+                    const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-                await new Promise(resolve => setTimeout(resolve, 20));
-            }
+                    const currentX = startX + (endX - startX) * ease;
+                    const currentY = startY + (endY - startY) * ease;
 
-            await new Promise(resolve => setTimeout(resolve, 300));
+                    line.setAttribute("x2", currentX * cellSideLength + cellSideLength / 2);
+                    line.setAttribute("y2", currentY * cellSideLength + cellSideLength / 2);
+
+                    if (t < 1)
+                        return requestAnimationFrame(animate);
+
+                    resolve();
+                }
+
+                requestAnimationFrame(animate);
+            });
         }
 
         function computeAIMove() {
@@ -255,8 +263,12 @@
                 console.log(`Player wins!`);
                 isGameOver = true;
 
-                const { startCoord, endCoord } = checkWin(playerSymbol);
-                await playRulerAnimation(startCoord, endCoord);
+                let { startCoord, endCoord } = checkWin(playerSymbol);
+
+                if (cellX === startCoord[0] && cellY === startCoord[1])
+                    [startCoord, endCoord] = [endCoord, startCoord];
+
+                await playRulerAnimation(startCoord, endCoord, 600);
                 getNextState(States.TTT_WON);
             }
 
