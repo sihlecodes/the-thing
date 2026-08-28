@@ -2,8 +2,11 @@ const States = Object.freeze({
     TTT_WON: 1,
     TTT_DRAW: 2,
     TTT_QUIZ: 3,
-    TTT_LOST: 4,
-    MAZE_COMPLETE: 5,
+    TTT_LOST_MESSAGE: 4,
+    TTT_QUIZ_MESSAGE: 7,
+
+    MAZE_COMPLETE: 8,
+    MAZE_QUIZ_MESSAGE: 5,
     MAZE_QUIZ: 6,
 });
 
@@ -43,15 +46,22 @@ function getNextState(currentState) {
 
     switch (currentState) {
         case States.TTT_WON:
-            showNaration('Congratulations', 'You have won the game of Tic Tac Toe', () => {
-                getNextState(States.TTT_QUIZ);
-                console.log('done!');
-                console.log('calling back from ttt won');
-            });
+            showQuiz('Tic Tac Toe Quiz',
+                'The day I first met you, you lent me something... what was it?',
+                ['A ruler', 'A pen', 'A calculator'],
+                () => {
+                    getNextState(States.TTT_QUIZ_MESSAGE);
+                },
+                () => {
+                    showNaration('Wrong Answer',
+                        'You have answered the quiz incorrectly. Please try again.',
+                        () => { window.location.reload(); });
+                },
+            );
 
             break;
 
-        case States.TTT_LOST:
+        case States.TTT_LOST_MESSAGE:
             showNaration('Oh no Thobile', 'You have lost the game of Tic Tac Toe', () => {
                 window.location.reload();
             });
@@ -82,7 +92,18 @@ function getNextState(currentState) {
             );
             break;
 
+        case States.TTT_QUIZ_MESSAGE:
+            showNaration('Congratulations', 'On my way back to my seat I remember thinking about how stunning you were.', () => {
+                loadPage('maze');
+                console.log('done!');
+            });
+            break;
+
         case States.MAZE_COMPLETE:
+            getNextState(States.QUIZ);
+            break;
+
+        case States.MAZE_QUIZ_MESSAGE:
             console.log('maze complete');
             showNaration('Congratulations', 'You have completed the maze!', () => {
                 getNextState(States.MAZE_QUIZ);
@@ -117,6 +138,7 @@ function getNextState(currentState) {
 }
 
 // loadPage('tic-tac-toe');
+getNextState(States.TTT_WON);
 
 // showQuiz('Tic Tac Toe Quiz',
 //     'You have completed the game of Tic Tac Toe! Now answer this question to proceed.',
@@ -130,4 +152,4 @@ function getNextState(currentState) {
 //     () => { console.log('Correct answer!'); },
 // );
 
-loadPage('maze');
+// loadPage('maze');
