@@ -266,18 +266,21 @@
             if (!isPathHead && has(cellProperties, PATH)) {
                 const index = indexesAlongPath.indexOf(cellIndex);
 
-                if (index >= 0) {
-                    for (let i = indexesAlongPath.length - 1; i > index; i--) {
-                        const backtrackCell = getCellFromIndex(indexesAlongPath.pop());
-                        maze[backtrackCell.y][backtrackCell.x] &= ~PATH;
-                        pathGroup.removeChild(pathGroup.lastChild);
-                    }
+                for (let i = indexesAlongPath.length - 1; i > index; i--) {
+                    const backtrackCell = getCellFromIndex(indexesAlongPath.pop());
+                    maze[backtrackCell.y][backtrackCell.x] &= ~PATH;
+                    pathGroup.removeChild(pathGroup.lastChild);
                 }
             }
 
             if (isStart) {
-                pathGroup.replaceChildren();
+                indexesAlongPath.forEach((index) => {
+                    const cell = getCellFromIndex(index);
+                    maze[cell.y][cell.x] &= ~PATH;
+                });
+
                 indexesAlongPath = [];
+                pathGroup.replaceChildren();
             }
 
             if (isStart && !pathGroup.hasChildNodes() ||
@@ -321,12 +324,6 @@
             if (newCurrentCellIndex === currentCellIndex)
                 return;
 
-            // isBacktracking = has(maze[currentCell.y][currentCell.x], PATH);
-
-            // if (isBacktracking) {
-            //     console.log('Backtracking detected');
-            // }
-
             previousCellIndex = currentCellIndex;
             currentCellIndex = newCurrentCellIndex;
 
@@ -368,14 +365,6 @@
                     return;
                 }
 
-                // if (isBacktracking) {
-                //     maze[previousCell.y][previousCell.x] &= ~PATH;
-
-                // pathGroup.remove
-                //     pathGroup.removeChild(pathGroup.lastChild);
-                //     indexesAlongPath.pop();
-                // }
-
                 if ((previousCell.x < currentCell.x && has(previousCellProperties, RIGHT)) ||
                     (previousCell.x > currentCell.x && has(previousCellProperties, LEFT)) ||
                     (previousCell.y < currentCell.y && has(previousCellProperties, BOTTOM)) ||
@@ -385,24 +374,17 @@
                     return;
                 }
 
-                if (false && has(currentCellProperties, PATH)) {
+                if (has(currentCellProperties, PATH)) {
                     const index = indexesAlongPath.indexOf(currentCellIndex);
 
-                    if (index >= 0) {
-                        console.log('Backtracking detected');
-                        maze[currentCell.y][currentCell.x] &= ~PATH;
-
-                        for (let i = indexesAlongPath.length - 1; i > index; i--) {
-                            const backtrackCell = getCellFromIndex(indexesAlongPath[i]);
-                            maze[backtrackCell.y][backtrackCell.x] &= ~PATH;
-                            pathGroup.removeChild(pathGroup.lastChild);
-                            indexesAlongPath.pop();
-                        }
+                    for (let i = indexesAlongPath.length - 1; i > index; i--) {
+                        const backtrackCell = getCellFromIndex(indexesAlongPath.pop());
+                        maze[backtrackCell.y][backtrackCell.x] &= ~PATH;
+                        pathGroup.removeChild(pathGroup.lastChild);
                     }
-                }
 
-                // if (isBacktracking)
-                    // return;
+                    return;
+                }
 
                 const previousCellCenterX = boardOffset + previousCell.x * cellWidth + cellWidth / 2;
                 const previousCellCenterY = boardOffset + previousCell.y * cellHeight + cellHeight / 2;
