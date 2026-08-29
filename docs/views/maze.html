@@ -253,13 +253,32 @@
             const y = event.clientY - rect.top;
 
             const cell = getCellFromCoordinates(x, y);
-            const cellProperties = cell ? maze[cell.y][cell.x] : 0;
 
             if (!cell)
                 return;
 
+            const cellProperties = maze[cell.y][cell.x];
             const cellIndex = getIndexFromCell(cell);
             const isStart = has(cellProperties, START);
+
+            const isPathHead = indexesAlongPath.length > 0 && indexesAlongPath[indexesAlongPath.length - 1] === cellIndex;
+
+            if (!isPathHead && has(cellProperties, PATH)) {
+                const index = indexesAlongPath.indexOf(cellIndex);
+
+                if (index >= 0) {
+                    for (let i = indexesAlongPath.length - 1; i > index; i--) {
+                        const backtrackCell = getCellFromIndex(indexesAlongPath.pop());
+                        maze[backtrackCell.y][backtrackCell.x] &= ~PATH;
+                        pathGroup.removeChild(pathGroup.lastChild);
+                    }
+                }
+            }
+
+            if (isStart) {
+                pathGroup.replaceChildren();
+                indexesAlongPath = [];
+            }
 
             if (isStart && !pathGroup.hasChildNodes() ||
                 has(cellProperties, PATH) &&
@@ -302,11 +321,11 @@
             if (newCurrentCellIndex === currentCellIndex)
                 return;
 
-            isBacktracking = has(maze[currentCell.y][currentCell.x], PATH);
+            // isBacktracking = has(maze[currentCell.y][currentCell.x], PATH);
 
-            if (isBacktracking) {
-                console.log('Backtracking detected');
-            }
+            // if (isBacktracking) {
+            //     console.log('Backtracking detected');
+            // }
 
             previousCellIndex = currentCellIndex;
             currentCellIndex = newCurrentCellIndex;
@@ -349,12 +368,13 @@
                     return;
                 }
 
-                if (isBacktracking) {
-                    maze[previousCell.y][previousCell.x] &= ~PATH;
+                // if (isBacktracking) {
+                //     maze[previousCell.y][previousCell.x] &= ~PATH;
 
-                    pathGroup.removeChild(pathGroup.lastChild);
-                    indexesAlongPath.pop();
-                }
+                // pathGroup.remove
+                //     pathGroup.removeChild(pathGroup.lastChild);
+                //     indexesAlongPath.pop();
+                // }
 
                 if ((previousCell.x < currentCell.x && has(previousCellProperties, RIGHT)) ||
                     (previousCell.x > currentCell.x && has(previousCellProperties, LEFT)) ||
@@ -365,8 +385,24 @@
                     return;
                 }
 
-                if (isBacktracking)
-                    return;
+                if (false && has(currentCellProperties, PATH)) {
+                    const index = indexesAlongPath.indexOf(currentCellIndex);
+
+                    if (index >= 0) {
+                        console.log('Backtracking detected');
+                        maze[currentCell.y][currentCell.x] &= ~PATH;
+
+                        for (let i = indexesAlongPath.length - 1; i > index; i--) {
+                            const backtrackCell = getCellFromIndex(indexesAlongPath[i]);
+                            maze[backtrackCell.y][backtrackCell.x] &= ~PATH;
+                            pathGroup.removeChild(pathGroup.lastChild);
+                            indexesAlongPath.pop();
+                        }
+                    }
+                }
+
+                // if (isBacktracking)
+                    // return;
 
                 const previousCellCenterX = boardOffset + previousCell.x * cellWidth + cellWidth / 2;
                 const previousCellCenterY = boardOffset + previousCell.y * cellHeight + cellHeight / 2;
@@ -379,7 +415,7 @@
                     currentCellCenterX, currentCellCenterY,
                     {
                         stroke: isValidDrag ? 'mediumslateblue' : 'red',
-                        strokeWidth: '8%',
+                        strokeWidth: `${Math.min(cellWidth, cellHeight) * 0.3}px`,
                         group: pathGroup
                     }
                 );
