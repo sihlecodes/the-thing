@@ -13,7 +13,7 @@
         flex-wrap: wrap;
         justify-content: center;
         padding: 0;
-        margin: 0 10px;
+        /* margin: 0 10px; */
         margin-top: 20px;
     }
 
@@ -24,6 +24,7 @@
         transition: background-color 0.3s;
         flex: 1 1 auto;
         text-align: center;
+        font-size: .85rem;
     }
 
     #options li:hover {
@@ -40,7 +41,7 @@
 <div id="options">
 </div>
 
-<span class="hint">Choose an option from the list.</span>
+<span class="hint">Choose an option.</span>
 
 <script>
     if (typeof quiz === 'undefined') {
@@ -50,7 +51,7 @@
             },
 
             setMessage: function (message) {
-                document.getElementById('message').textContent = message;
+                document.getElementById('message').innerHTML = message;
             },
 
             setOptions: function (options) {
