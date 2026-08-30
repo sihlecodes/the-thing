@@ -12,6 +12,7 @@ body {
     box-sizing: border-box;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #content {
@@ -30,4 +31,9 @@ body {
     font-size: .9em;
     color: #888;
     margin: 0 15%;
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.4s ease;
 }

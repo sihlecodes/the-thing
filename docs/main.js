@@ -19,11 +19,17 @@ async function loadPage(pageName) {
     const html = await response.text();
     const fragment = document.createRange().createContextualFragment(html);
 
-    content.innerHTML = '';
-    content.appendChild(fragment);
+    content.classList.add('fade-out');
+
+    await new Promise(resolve => {
+        content.addEventListener('transitionend', resolve, { once: true });
+    });
+
+    content.replaceChildren(fragment);
+    content.classList.remove('fade-out');
 }
 
-async function showNarration({ hint = '', heading = '', message, callback, holdDuration = 300 } = {}) {
+async function showNarration({ hint = '', heading = '', message, callback, holdDuration = 500 } = {}) {
     await loadPage('narration');
 
     if (heading.length > 0)
@@ -50,15 +56,17 @@ async function showQuiz({ heading = '', message, options, correctAnswerCallback,
     quiz.setOptions(options);
 };
 
-function getNextState(currentState) {
-    console.log('Current state:', currentState);
+async function getNextState(currentState, holdDuration = 0) {
+    await new Promise(resolve => setTimeout(resolve, holdDuration));
     const refreshPage = () => window.location.reload();
+
+    console.log('Current state:', currentState);
 
     switch (currentState) {
         case States.BEGIN:
             showQuiz({
                 message: 'The first time I met you was in WWG&nbsp;315. I asked the guys sitting next to me if I could borrow something, and from all the way across the room, you were the one who offered to lend me yours.<br><br>Do you remember what it was?',
-                options: ['A ruler', 'A pen', 'A calculator'],
+                options: ['A ruler', 'A pen', 'A calculator', 'A pair of scissors'],
 
                 correctAnswerCallback: () => {
                     loadPage('tic-tac-toe');
@@ -67,7 +75,7 @@ function getNextState(currentState) {
 
                 wrongAnswerCallback: () => {
                     showNarration({
-                        message: 'That\'s not right. 😭',
+                        message: 'Nope, that\'s not it. 😅',
                         hint: 'Tap and hold the screen if you want to try again.',
                         callback: refreshPage
                     });
@@ -78,7 +86,7 @@ function getNextState(currentState) {
 
         case States.TTT_LOST:
             showNarration({
-                message: 'It\'s actually impressive that you managed to lose considering that I intentionally programmed the AI to let you win. 😭🤣',
+                message: 'Ngl, it\'s kind of impressive that you managed to lose when I literally programmed the AI to let you win 😭🤣',
                 hint: 'Tap and hold the screen if you want to try again.',
                 callback: refreshPage
             });
@@ -87,7 +95,7 @@ function getNextState(currentState) {
 
         case States.TTT_DRAW:
             showNarration({
-                message: 'How did you even manage to get a draw? I literally programmed the AI to let you win. 😭🤣',
+                message: 'How did you even manage a draw?? I programmed the AI to let you win 😭🤣',
                 hint: 'Tap and hold the screen if you want to try again.',
                 callback: refreshPage
             });
@@ -143,7 +151,7 @@ function getNextState(currentState) {
                         wrongAnswerCallback: () => {
                             showNarration({
                                 hint: 'Tap and hold the screen if you want to try again.',
-                                message: 'That\'s not right. 😭',
+                                message: 'Nope, that\'s not it. 😅',
                                 callback: refreshPage
                             });
                         }

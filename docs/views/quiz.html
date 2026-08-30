@@ -58,13 +58,20 @@
                 const optionsList = document.getElementById('options');
                 optionsList.innerHTML = '';
 
+                const wrapCallback = (callback) => {
+                    return async () => {
+                        await new Promise(resolve => setTimeout(resolve, 400));
+                        callback();
+                    };
+                }
+
                 options.forEach((option, index) => {
                     const li = document.createElement('li');
 
                     if (index === 0)
-                        li.addEventListener('click', this.correctAnswerCallback);
+                        li.addEventListener('click', wrapCallback(this.correctAnswerCallback));
                     else
-                        li.addEventListener('click', this.wrongAnswerCallback);
+                        li.addEventListener('click', wrapCallback(this.wrongAnswerCallback));
 
                     li.textContent = option;
                     optionsList.appendChild(li);

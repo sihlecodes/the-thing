@@ -259,6 +259,8 @@
                 ({ result: aiMoveResult, startCoord, endCoord } = checkWin(aiSymbol));
             }
 
+            const holdDuration = 300;
+
             if (playerMoveResult) {
                 console.log(`Player wins!`);
                 isGameOver = true;
@@ -269,7 +271,7 @@
                     [startCoord, endCoord] = [endCoord, startCoord];
 
                 await playRulerAnimation(startCoord, endCoord, 600);
-                getNextState(States.TTT_WON);
+                getNextState(States.TTT_WON, holdDuration);
             }
 
             else if (aiMoveResult) {
@@ -278,14 +280,14 @@
 
                 const { startCoord, endCoord } = checkWin(aiSymbol);
                 await playRulerAnimation(startCoord, endCoord);
-                getNextState(States.TTT_LOST);
+                getNextState(States.TTT_LOST, holdDuration
+                );
             }
 
             else if (turn >= rows * columns) {
-                console.log("Player: Oh no, Thobile. How did you manage to get a draw. I specifically programmed the computer to lose. Try again, or not.");
                 isGameOver = true;
 
-                getNextState(States.TTT_DRAW);
+                getNextState(States.TTT_DRAW, holdDuration);
             }
         });
 
