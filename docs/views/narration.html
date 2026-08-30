@@ -1,13 +1,17 @@
 <link rel="stylesheet" href="main.css">
 
 <style>
-    h1 {
+    #heading {
         display: none;
+    }
+
+    #message {
+        font-size: 1.3rem;
     }
 </style>
 
-<h1></h1>
-<h2></h2>
+<h1 id="heading"></h1>
+<h2 id="message"></h2>
 
 <span id="hint" class="hint">Tap and hold the screen to continue</span>
 
@@ -27,13 +31,13 @@
             holdDuration: 1000,
 
             setHeading: function (heading) {
-                document.querySelector('h1').textContent = heading;
+                document.querySelector('#heading').textContent = heading;
             },
             showHeading: function () {
-                document.querySelector('h1').style.display = 'block';
+                document.querySelector('#heading').style.display = 'block';
             },
             setMessage: function (message) {
-                document.querySelector('h2').textContent = message;
+                document.querySelector('#message').innerHTML = message;
             },
             setHint: function (hint) {
                 document.getElementById('hint').textContent = hint;

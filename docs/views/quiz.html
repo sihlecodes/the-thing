@@ -41,7 +41,7 @@
 <div id="options">
 </div>
 
-<span class="hint">Choose an option from the list.</span>
+<span class="hint">Choose an option.</span>
 
 <script>
     if (typeof quiz === 'undefined') {
@@ -51,7 +51,7 @@
             },
 
             setMessage: function (message) {
-                document.getElementById('message').textContent = message;
+                document.getElementById('message').innerHTML = message;
             },
 
             setOptions: function (options) {
