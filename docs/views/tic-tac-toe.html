@@ -2,26 +2,40 @@
 
 <style>
     #board {
-        fill: #e6c9db;
+        fill: #d7c0f2;
+    }
+
+    #board-outline {
+        fill: none;
+        stroke: white;
+        stroke-width: 10px;
+        stroke-linejoin: round;
     }
 
     .alternate-cell {
-        fill: #fff;
+        fill: #f4effe;
     }
 
     .cross {
-        stroke: red;
+        stroke: #8b91e7;
         stroke-width: 5%;
     }
 
     .circle {
-        stroke: black;
+        fill: #eb8296;
+        stroke: #eb8296;
+        stroke-width: 5%;
+    }
+
+    .ruler-line {
+        stroke: rgb(113, 97, 181);
         stroke-width: 5%;
     }
 </style>
 
-<svg id="canvas">
+<svg id="canvas" overflow="visible">
     <rect id="board" x="0" y="0" width="100%" height="100%" rx="5%" />
+    <rect id="board-outline" x="0" y="0" width="100%" height="100%" rx="5%" />
 </svg>
 
 <script>
@@ -49,8 +63,10 @@
             cell.setAttribute("width", cellSideLength);
             cell.setAttribute("height", cellSideLength);
 
-            canvas.appendChild(cell);
+            canvas.insertBefore(cell, canvas.lastChild);
         }
+
+        canvas.appendChild(document.getElementById('board-outline'));
 
         let isGameOver = false;
         let turn = 0;
@@ -164,12 +180,11 @@
             const [endX, endY] = endCoord;
 
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.classList.add("ruler-line");
             line.setAttribute("x1", startX * cellSideLength + cellSideLength / 2);
             line.setAttribute("y1", startY * cellSideLength + cellSideLength / 2);
             line.setAttribute("x2", endX * cellSideLength + cellSideLength / 2);
             line.setAttribute("y2", endY * cellSideLength + cellSideLength / 2);
-            line.setAttribute("stroke", "green");
-            line.setAttribute("stroke-width", "5%");
 
             canvas.appendChild(line);
 

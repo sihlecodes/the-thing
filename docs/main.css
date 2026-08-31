@@ -1,11 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap');
+
 body {
-    background-color: #fee9f6;
+    background-color: #e8e1fa;
     user-select: none;
     margin: 0;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     text-align: center;
+    font-family: 'Dosis', sans-serif;
+    font-optical-sizing: auto;
+}
+
+h1, h2 {
+    font-weight: 400;
+    font-size: 1.3rem;
 }
 
 * {
@@ -23,17 +32,18 @@ body {
     height: 100vh;
     height: 100dvh;
     padding: 0 15%;
+    transition: opacity 0.4s ease;
 }
 
 .hint {
     position: absolute;
     bottom: 5%;
     font-size: .9em;
-    color: #888;
+    color: #8a8ed7;
     margin: 0 15%;
+    font-weight: 500;
 }
 
 .fade-out {
     opacity: 0;
-    transition: opacity 0.4s ease;
 }

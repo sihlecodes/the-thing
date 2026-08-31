@@ -135,7 +135,7 @@ async function getNextState(currentState, holdDuration = 0) {
                         options: ['WWG 112', 'WWG 113', 'WWG 226', 'WWG 223'],
                         correctAnswerCallback: () => {
                             showNarration({
-                                message: 'I had spotted you on my way down the stairs, and we waved at each other. I kept walking, and I was almost out of the building when it hit me:<br><br>"this might be my only chance in a while to talk to her."',
+                                message: 'I had spotted you on my way down the stairs. We waved at each other and I kept walking. I was almost out of the building when it hit me:<br><br>"this might be my only chance in a while to talk to her."',
                                 callback: () => {
                                     showNarration({
                                         message: 'So I turned around and walked back up, and you were still there. Turns out you didn\'t know there was another way around to that side of the building, so I offered to walk you there myself.',
@@ -202,8 +202,8 @@ async function getNextState(currentState, holdDuration = 0) {
     }
 }
 
-// loadPage('tic-tac-toe');
-getNextState(States.BEGIN);
+loadPage('tic-tac-toe');
+// getNextState(States.BEGIN);
 // getNextState(States.MAZE_COMPLETE);
 
 // showQuiz('Tic Tac Toe Quiz',

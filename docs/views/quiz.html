@@ -19,12 +19,14 @@
 
     #options li {
         background-color: #e98ea6;
-        padding: 1.2em 1.7em;
+        padding: 1.1em 1.5em;
         border-radius: 5px;
         transition: background-color 0.3s;
         flex: 1 1 auto;
         text-align: center;
-        font-size: .85rem;
+        font-size: .95rem;
+        font-weight: 500;
+        color: #f6e9e9;
     }
 
     #options li:hover {
@@ -33,6 +35,11 @@
 
     #options li:active {
         background-color: #c66b84;
+    }
+
+    .clicked {
+        transition: background-color unset;
+        background-color: #c66b84 !important;
     }
 </style>
 
@@ -59,7 +66,8 @@
                 optionsList.innerHTML = '';
 
                 const wrapCallback = (callback) => {
-                    return async () => {
+                    return async function() {
+                        this.classList.add('clicked');
                         await new Promise(resolve => setTimeout(resolve, 400));
                         callback();
                     };
